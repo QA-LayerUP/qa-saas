@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 
 // Importações dinâmicas são essenciais aqui para evitar carregar binários pesados onde não deve
@@ -69,7 +70,7 @@ export async function POST(req: Request) {
 
         await browser.close();
 
-        return new NextResponse(screenshot, {
+        return new NextResponse(screenshot as any, {
             status: 200,
             headers: {
                 "Content-Type": "image/png",
