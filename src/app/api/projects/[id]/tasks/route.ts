@@ -20,6 +20,7 @@ export async function POST(request: Request, context: { params: any }) {
     let description: string | undefined
     let priority: string = 'media'
     let assigned_role: string | null = null
+    let team_id: string | null = null
     let imageFile: File | null = null
     let imageBase64: string | null = null
 
@@ -30,6 +31,7 @@ export async function POST(request: Request, context: { params: any }) {
       description = (form.get('description') as string) || undefined
       priority = (form.get('priority') as string) || priority
       assigned_role = (form.get('assigned_role') as string) || null
+      team_id = (form.get('team_id') as string) || null
       const file = form.get('image') as File | null
       if (file && file.size) imageFile = file
     } else {
@@ -39,6 +41,7 @@ export async function POST(request: Request, context: { params: any }) {
       description = body?.description
       priority = body?.priority || priority
       assigned_role = body?.assigned_role || null
+      team_id = body?.team_id || null
       // support base64 payload: { imageBase64: 'data:image/png;base64,...' }
       imageBase64 = body?.imageBase64 || null
     }
@@ -66,6 +69,7 @@ export async function POST(request: Request, context: { params: any }) {
       title,
       description: description || null,
       priority,
+      team_id: team_id || null,
       status: 'aberto',
       created_by: user.id,
       assigned_role: assigned_role || null,
