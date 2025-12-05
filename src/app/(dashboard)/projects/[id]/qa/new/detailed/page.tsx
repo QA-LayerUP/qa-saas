@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { VisualQABrowser } from '@/components/qa/VisualQABrowser'
+import { FullPageCapture } from '@/components/qa/FullPageCapture'
 import { redirect } from 'next/navigation'
 
 export default async function DetailedQAPage({ params }: { params: Promise<{ id: string }> }) {
@@ -36,7 +36,7 @@ export default async function DetailedQAPage({ params }: { params: Promise<{ id:
 
     return (
         <div className="h-[calc(100vh-4rem)]">
-            <VisualQABrowser
+            <FullPageCapture
                 projectId={projectId}
                 siteUrl={project.site_url}
                 categoryId={categories[0].id}

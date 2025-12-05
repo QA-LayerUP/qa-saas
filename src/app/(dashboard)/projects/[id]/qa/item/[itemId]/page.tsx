@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createClient } from '@/lib/supabase/server'
 import { EvidenceUpload } from '@/components/qa/EvidenceUpload'
+import { EvidencesDisplay } from '@/components/qa/EvidencesDisplay'
 import { CommentSection } from '@/components/qa/CommentSection'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -92,33 +94,7 @@ export default async function QAItemPage({ params }: { params: Promise<{ id: str
                             <EvidenceUpload itemId={itemId} />
                         </CardHeader>
                         <CardContent>
-                            {evidences && evidences.length > 0 ? (
-                                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                                    {evidences.map((evidence) => (
-                                        <a
-                                            key={evidence.id}
-                                            href={evidence.file_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="group relative aspect-video overflow-hidden rounded-md border bg-muted"
-                                        >
-                                            {evidence.file_type.startsWith('image/') ? (
-                                                <img
-                                                    src={evidence.file_url}
-                                                    alt="Evidence"
-                                                    className="object-cover w-full h-full transition-transform group-hover:scale-105"
-                                                />
-                                            ) : (
-                                                <div className="flex items-center justify-center h-full">
-                                                    <FileText className="h-8 w-8 text-muted-foreground" />
-                                                </div>
-                                            )}
-                                        </a>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-sm text-muted-foreground">Nenhuma evidência anexada.</p>
-                            )}
+                            <EvidencesDisplay evidences={evidences} />
                         </CardContent>
                     </Card>
 

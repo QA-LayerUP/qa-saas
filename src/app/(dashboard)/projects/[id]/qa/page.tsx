@@ -1,12 +1,18 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createClient } from '@/lib/supabase/server'
-import { CreateQAItemModal } from '@/components/qa/CreateQAItemModal'
 import { CreateCategoryModal } from '@/components/qa/CreateCategoryModal'
+import { CreateTeamModal } from '@/components/teams/CreateTeamModal'
 import { TaskModeSelector } from '@/components/qa/TaskModeSelector'
+import { NewQAItemButton } from '@/components/qa/NewQAItemButton'
 import { QAItemCard } from '@/components/qa/QAItemCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { QAItem, QACategory } from '@/lib/types'
 
-export default async function ProjectQAPage({ params }: { params: Promise<{ id: string }> }) {
+interface ProjectQAPageProps {
+    params: Promise<{ id: string }>
+}
+
+export default async function ProjectQAPage({ params }: ProjectQAPageProps) {
     const supabase = await createClient()
     const { id: projectId } = await params
 
@@ -48,8 +54,9 @@ export default async function ProjectQAPage({ params }: { params: Promise<{ id: 
                     <h1 className="text-3xl font-bold tracking-tight">{project?.name} - QA</h1>
                     <p className="text-muted-foreground">Gerencie os itens de QA deste projeto.</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
                     <CreateCategoryModal projectId={projectId} />
+                    <CreateTeamModal projectId={projectId} />
                     {project?.site_url ? (
                         <TaskModeSelector
                             categories={categories || []}
@@ -57,7 +64,14 @@ export default async function ProjectQAPage({ params }: { params: Promise<{ id: 
                             hasCategories={(categories || []).length > 0}
                         />
                     ) : (
-                        <CreateQAItemModal categories={categories || []} projectId={projectId} />
+                        <>
+                            {(categories || []).length > 0 && (
+                                <NewQAItemButton
+                                    categories={categories || []}
+                                    projectId={projectId}
+                                />
+                            )}
+                        </>
                     )}
                 </div>
             </div>

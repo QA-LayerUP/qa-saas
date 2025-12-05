@@ -26,13 +26,16 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "dom-to-image": "^2.6.0",
     "fabric": "^6.9.0",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.555.0",
     "next": "16.0.6",
     "puppeteer-core": "^19.11.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-picture-annotation": "^1.2.0",
+    "react-sketch-canvas": "^6.2.0",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {

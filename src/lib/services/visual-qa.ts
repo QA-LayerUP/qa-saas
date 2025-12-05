@@ -16,26 +16,49 @@ export async function uploadScreenshot(
     const timestamp = Date.now()
     const filename = `${projectId}/${timestamp}-screenshot.png`
 
-    // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
-        .from('evidences')
-        .upload(filename, imageBlob, {
-            contentType: 'image/png',
-            cacheControl: '3600',
-            upsert: false
-        })
+    console.log('[uploadScreenshot] Iniciando upload:', {
+        filename,
+        blobSize: imageBlob.size,
+        blobType: imageBlob.type
+    })
 
-    if (error) {
-        console.error('Error uploading screenshot:', error)
-        throw new Error('Failed to upload screenshot')
+    try {
+        // Upload to Supabase Storage
+        const { data, error } = await supabase.storage
+            .from('evidences')
+            .upload(filename, imageBlob, {
+                contentType: 'image/png',
+                cacheControl: '3600',
+                upsert: false
+            })
+
+        if (error) {
+            console.error('[uploadScreenshot] ❌ Erro no upload:', error)
+            throw new Error(`Failed to upload screenshot: ${error.message}`)
+        }
+
+        console.log('[uploadScreenshot] ✅ Upload concluído:', data)
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('evidences')
+            .getPublicUrl(data.path)
+
+        console.log('[uploadScreenshot] 📍 URL pública retornada:', publicUrl)
+        console.log('[uploadScreenshot] 📄 Caminho do arquivo:', data.path)
+
+        // Verifica se a URL é válida
+        if (!publicUrl || publicUrl.length === 0) {
+            console.error('[uploadScreenshot] ❌ URL pública vazia!')
+            throw new Error('Public URL is empty')
+        }
+
+        return publicUrl
+
+    } catch (err) {
+        console.error('[uploadScreenshot] ❌ Erro geral:', err)
+        throw err
     }
-
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-        .from('evidences')
-        .getPublicUrl(data.path)
-
-    return publicUrl
 }
 
 /**
@@ -56,6 +79,12 @@ export async function createVisualQAItem(params: {
 }): Promise<string> {
     const supabase = createClient()
 
+    console.log('[createVisualQAItem] Iniciando criação do QA item', {
+        categoryId: params.categoryId,
+        imageUrl: params.imageUrl,
+        pageUrl: params.pageUrl
+    })
+
     // Create the QA item
     const { data: qaItem, error: itemError } = await supabase
         .from('qa_items')
@@ -74,23 +103,31 @@ export async function createVisualQAItem(params: {
         .single()
 
     if (itemError) {
-        console.error('Error creating QA item:', itemError)
-        throw new Error('Failed to create QA item')
+        console.error('[createVisualQAItem] ❌ Erro ao criar QA item:', itemError)
+        throw new Error(`Failed to create QA item: ${itemError.message}`)
     }
 
+    console.log('[createVisualQAItem] ✅ QA item criado:', { id: qaItem.id })
+
     // Create the evidence record
-    const { error: evidenceError } = await supabase
+    console.log('[createVisualQAItem] Criando evidence record com URL:', params.imageUrl)
+    
+    const { data: evidence, error: evidenceError } = await supabase
         .from('qa_evidences')
         .insert({
             qa_item_id: qaItem.id,
             file_url: params.imageUrl,
             file_type: 'image/png'
         })
+        .select()
+        .single()
 
     if (evidenceError) {
-        console.error('Error creating evidence:', evidenceError)
-        throw new Error('Failed to create evidence record')
+        console.error('[createVisualQAItem] ❌ Erro ao criar evidence:', evidenceError)
+        throw new Error(`Failed to create evidence record: ${evidenceError.message}`)
     }
+
+    console.log('[createVisualQAItem] ✅ Evidence criado:', { id: evidence.id, file_url: evidence.file_url })
 
     return qaItem.id
 }

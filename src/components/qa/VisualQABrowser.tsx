@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useRef } from 'react'
@@ -49,24 +49,20 @@ export function VisualQABrowser({ projectId, siteUrl, categoryId }: VisualQABrow
         setImageBase64(null)
 
         try {
-            // Pega as dimensões atuais do iframe, se disponível
-            const iframeWidth = iframeRef.current?.clientWidth || 1280;
-            const iframeHeight = iframeRef.current?.clientHeight || 800;
-
-            // Tenta pegar o scroll e pixel ratio do iframe (pode falhar se for cross-origin)
-            let x = 0;
-            let y = 0;
-            let deviceScaleFactor = window.devicePixelRatio || 1;
-
-            try {
-                if (iframeRef.current?.contentWindow) {
-                    x = iframeRef.current.contentWindow.scrollX;
-                    y = iframeRef.current.contentWindow.scrollY;
-                    deviceScaleFactor = iframeRef.current.contentWindow.devicePixelRatio || 1;
-                }
-            } catch (e) {
-                console.warn("Não foi possível acessar o scroll do iframe (provavelmente cross-origin). Usando (0,0).");
+            // Obter dimensões reais do iframe
+            const iframe = iframeRef.current
+            if (!iframe) {
+                throw new Error("Iframe não encontrado")
             }
+
+            const iframeWidth = Math.round(iframe.clientWidth) || 1280
+            const iframeHeight = Math.round(iframe.clientHeight) || 800
+
+            console.log("Capturando com dimensões:", {
+                url: siteUrl,
+                width: iframeWidth,
+                height: iframeHeight
+            })
 
             const res = await fetch("/api/screenshot", {
                 method: "POST",
@@ -75,26 +71,39 @@ export function VisualQABrowser({ projectId, siteUrl, categoryId }: VisualQABrow
                     url: siteUrl,
                     width: iframeWidth,
                     height: iframeHeight,
-                    x,
-                    y,
-                    deviceScaleFactor
+                    fullPage: false
                 })
             })
 
             if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.details || "Erro ao capturar imagem");
+                let errorMessage = "Erro ao capturar imagem"
+                try {
+                    const errorData = await res.json()
+                    errorMessage = errorData.details || errorMessage
+                } catch {
+                    errorMessage = `Erro ${res.status}: ${res.statusText}`
+                }
+                throw new Error(errorMessage)
             }
 
             const blob = await res.blob()
-            const base64 = await blobToBase64(blob)
+            console.log("Blob recebido:", {
+                size: blob.size,
+                type: blob.type
+            })
 
+            if (blob.size === 0) {
+                throw new Error("Imagem capturada está vazia")
+            }
+
+            const base64 = await blobToBase64(blob)
             setImageBase64(base64)
             setEditorOpen(true)
 
         } catch (err: any) {
-            console.error(err)
-            alert(`Erro: ${err.message}`)
+            console.error("Erro na captura:", err)
+            const message = err.message || "Erro desconhecido ao capturar imagem"
+            alert(`Erro: ${message}`)
         } finally {
             setCapturing(false)
         }
@@ -173,18 +182,18 @@ export function VisualQABrowser({ projectId, siteUrl, categoryId }: VisualQABrow
                 )}
             </div>
 
-            {imageBase64 && (
-                <AnnotationEditor
-                    key={Date.now()} // <--- ADICIONE ISSO (ou use key={imageBase64})
-                    imageUrl={imageBase64}
-                    open={editorOpen}
-                    onClose={() => {
-                        setImageBase64(null)
-                        setEditorOpen(false)
-                    }}
-                    onSave={handleSaveAnnotation}
-                />
-            )}
+            {/* {imageBase64 && (
+                // <AnnotationEditor
+                //     key={Date.now()} // <--- ADICIONE ISSO (ou use key={imageBase64})
+                //     imageUrl={imageBase64}
+                //     open={editorOpen}
+                //     onClose={() => {
+                //         setImageBase64(null)
+                //         setEditorOpen(false)
+                //     }}
+                //     onSave={handleSaveAnnotation}
+                // />
+            )} */}
         </div>
     )
 }

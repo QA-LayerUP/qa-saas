@@ -74,43 +74,33 @@ export function useAnnotationCanvas({ imageUrl }: UseAnnotationCanvasProps) {
             // Validação de segurança
             if (naturalW === 0 || naturalH === 0) return
 
-            // Área disponível (container)
-            const container = containerSizeRef.current
-            const availW = container?.width ? Math.max(200, container.width - 64) : Math.min(naturalW, 1200)
-            const availH = container?.height ? Math.max(200, container.height - 160) : Math.min(naturalH, 800)
+            console.log('[useAnnotationCanvas.onload] Dimensões da imagem:', {
+                naturalW,
+                naturalH
+            })
 
-            // Calcula scale para caber na área disponível
-            const scale = Math.min(1, Math.min(availW / naturalW, availH / naturalH))
+            // Configura o canvas com o tamanho REAL da imagem
+            // Não redimensiona para não perder qualidade
+            canvas.width = naturalW
+            canvas.height = naturalH
 
-            // Device pixel ratio para manter nitidez
-            const DPR = window.devicePixelRatio || 1
-            const targetW = Math.round(naturalW * scale)
-            const targetH = Math.round(naturalH * scale)
-
-            // Configura tamanho real do canvas (pixels)
-            canvas.width = Math.round(targetW * DPR)
-            canvas.height = Math.round(targetH * DPR)
-
-            // Configura tamanho CSS (visualização)
-            canvas.style.width = `${targetW}px`
-            canvas.style.height = `${targetH}px`
-
-            // Escala o contexto de desenho
-            ctx.setTransform(DPR, 0, 0, DPR, 0, 0)
-
-            // Garante limpeza após redimensionar
-            ctx.clearRect(0, 0, targetW, targetH)
+            // Garante limpeza
+            ctx.clearRect(0, 0, naturalW, naturalH)
 
             // Desenha a imagem
-            ctx.drawImage(img, 0, 0, targetW, targetH)
+            ctx.drawImage(img, 0, 0, naturalW, naturalH)
 
-            // Salva o estado inicial (Base) no histórico
+            console.log('[useAnnotationCanvas.onload] Canvas configurado:', {
+                canvasWidth: canvas.width,
+                canvasHeight: canvas.height
+            })
+
+            // Salva o estado inicial
             try {
-                // Precisamos pegar os dados brutos do canvas real (com DPR aplicado ou não, dependendo da estratégia de undo)
-                // Aqui pegamos o buffer inteiro do canvas
                 const snap = ctx.getImageData(0, 0, canvas.width, canvas.height)
                 setHistory([snap])
                 setRedoStack([])
+                console.log('[useAnnotationCanvas.onload] Estado inicial salvo')
             } catch (e) {
                 console.warn('initial getImageData failed', e)
             }
@@ -123,17 +113,22 @@ export function useAnnotationCanvas({ imageUrl }: UseAnnotationCanvasProps) {
         // 3. Define o src por último para garantir o disparo do onload
         img.src = imageUrl
 
-    }, [imageUrl]) // Removemos 'saveState' para evitar dependências circulares desnecessárias no load
+    }, [imageUrl])
 
     // Export (retorna Blob)
     const exportImage = useCallback((): Promise<Blob> => {
         return new Promise((resolve, reject) => {
             const canvas = canvasRef.current
             if (!canvas) return reject(new Error('Canvas not initialized'))
+            
+            console.log('[exportImage] Canvas dimensions:', { width: canvas.width, height: canvas.height })
+            
+            // Tenta usar a qualidade máxima possível
             canvas.toBlob((blob) => {
                 if (!blob) return reject(new Error('Failed to export blob'))
+                console.log('[exportImage] Blob gerado:', { size: blob.size, type: blob.type })
                 resolve(blob)
-            }, 'image/png')
+            }, 'image/png', 1.0) // 1.0 = máxima qualidade para PNG
         })
     }, [])
 
