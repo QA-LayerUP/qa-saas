@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -18,10 +18,11 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Loader2, Upload, X } from 'lucide-react'
-import { QACategory } from '@/lib/types'
+import { QACategory, Team } from '@/lib/types' // Certifique-se de ter o tipo Team exportado
 import { uploadScreenshot } from '@/lib/services/visual-qa'
 
 interface CreateQAItemModalProps {
+    teams: Team[] // Adicionado: Recebemos a lista de times
     categories: QACategory[]
     projectId: string
     open?: boolean
@@ -30,6 +31,7 @@ interface CreateQAItemModalProps {
 }
 
 export function CreateQAItemModal({
+    teams,
     categories,
     projectId,
     open: controlledOpen,
@@ -43,16 +45,29 @@ export function CreateQAItemModal({
     const setOpen = isControlled ? controlledOnOpenChange : setInternalOpen
 
     const [loading, setLoading] = useState(false)
+    
+    // Estados do Formulário
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
+    const [selectedTeamId, setSelectedTeamId] = useState<string>('') // Novo controle de Time
     const [categoryId, setCategoryId] = useState('')
     const [priority, setPriority] = useState('media')
-    const [assignedRole, setAssignedRole] = useState('')
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
+    
     const fileInputRef = useRef<HTMLInputElement>(null)
-
     const router = useRouter()
     const supabase = createClient()
+
+    // Filtra as categorias com base no time selecionado
+    const filteredCategories = useMemo(() => {
+        if (!selectedTeamId) return []
+        return categories.filter(cat => cat.team_id === selectedTeamId)
+    }, [categories, selectedTeamId])
+
+    const handleTeamChange = (value: string) => {
+        setSelectedTeamId(value)
+        setCategoryId('') // Reseta a categoria se mudar o time
+    }
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -62,7 +77,7 @@ export function CreateQAItemModal({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!categoryId) return
+        if (!categoryId || !selectedTeamId) return
         setLoading(true)
 
         try {
@@ -73,12 +88,12 @@ export function CreateQAItemModal({
                 .from('qa_items')
                 .insert([
                     {
+                        team_id: selectedTeamId, // Agora salvamos o ID do time real
                         category_id: categoryId,
                         title,
                         description,
                         priority,
                         status: 'aberto',
-                        assigned_role: assignedRole || null,
                         created_by: user?.id
                     }
                 ])
@@ -98,16 +113,20 @@ export function CreateQAItemModal({
                 })
             }
 
+            // Reset Form
             setOpen?.(false)
             setTitle('')
             setDescription('')
             setPriority('media')
-            setAssignedRole('')
+            setCategoryId('')
+            // Não resetamos o time aqui propositalmente para facilitar criações seguidas, 
+            // mas você pode resetar setSelectedTeamId('') se preferir.
             setSelectedFile(null)
+            
             router.refresh()
         } catch (error) {
             console.error('Error creating item:', error)
-            alert('Erro ao criar item. Verifique o console.')
+            alert('Erro ao criar item. Verifique se o banco de dados tem a coluna team_id em qa_items.')
         } finally {
             setLoading(false)
         }
@@ -128,31 +147,59 @@ export function CreateQAItemModal({
                     <DialogHeader>
                         <DialogTitle>Novo Item de QA</DialogTitle>
                         <DialogDescription>
-                            Crie uma tarefa simples, anexe evidências e atribua a um time.
+                            Selecione o time, a categoria e descreva o problema.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
 
-                        {/* Categoria */}
+                        {/* 1. Time Responsável (Filtro Principal) */}
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="category" className="text-right">
-                                Categoria
+                            <Label htmlFor="team" className="text-right font-semibold">
+                                Time
                             </Label>
-                            <Select value={categoryId} onValueChange={setCategoryId} required>
+                            <Select value={selectedTeamId} onValueChange={handleTeamChange} required>
                                 <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Selecione uma categoria" />
+                                    <SelectValue placeholder="Selecione o time responsável" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {categories.map((cat) => (
-                                        <SelectItem key={cat.id} value={cat.id}>
-                                            {cat.title}
+                                    {teams.map((team) => (
+                                        <SelectItem key={team.id} value={team.id}>
+                                            {team.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>
 
-                        {/* Título */}
+                        {/* 2. Categoria (Filtrada pelo Time) */}
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="category" className="text-right">
+                                Categoria
+                            </Label>
+                            <Select 
+                                value={categoryId} 
+                                onValueChange={setCategoryId} 
+                                disabled={!selectedTeamId} // Desabilita se não tiver time
+                                required
+                            >
+                                <SelectTrigger className="col-span-3">
+                                    <SelectValue placeholder={!selectedTeamId ? "Selecione um time primeiro" : "Selecione uma categoria"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {filteredCategories.length === 0 ? (
+                                        <SelectItem value="none" disabled>Nenhuma categoria neste time</SelectItem>
+                                    ) : (
+                                        filteredCategories.map((cat) => (
+                                            <SelectItem key={cat.id} value={cat.id}>
+                                                {cat.title}
+                                            </SelectItem>
+                                        ))
+                                    )}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* 3. Título */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="title" className="text-right">
                                 Título
@@ -163,11 +210,11 @@ export function CreateQAItemModal({
                                 onChange={(e) => setTitle(e.target.value)}
                                 className="col-span-3"
                                 required
-                                placeholder="Resumo do problema"
+                                placeholder="Ex: Botão desalinhado no mobile"
                             />
                         </div>
 
-                        {/* Prioridade */}
+                        {/* 4. Prioridade */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="priority" className="text-right">
                                 Urgência
@@ -184,28 +231,10 @@ export function CreateQAItemModal({
                             </Select>
                         </div>
 
-                        {/* Time Responsável */}
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="role" className="text-right">
-                                Time Resp.
-                            </Label>
-                            <Select value={assignedRole} onValueChange={setAssignedRole}>
-                                <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Selecione o time (opcional)" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="ux">UX / Design</SelectItem>
-                                    <SelectItem value="dev">Desenvolvimento</SelectItem>
-                                    <SelectItem value="content">Conteúdo</SelectItem>
-                                    <SelectItem value="qa">QA</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {/* Descrição */}
+                        {/* 5. Descrição */}
                         <div className="grid grid-cols-4 items-start gap-4">
                             <Label htmlFor="description" className="text-right pt-2">
-                                Comentário
+                                Detalhes
                             </Label>
                             <Textarea
                                 id="description"
@@ -213,11 +242,11 @@ export function CreateQAItemModal({
                                 onChange={(e) => setDescription(e.target.value)}
                                 className="col-span-3"
                                 rows={3}
-                                placeholder="Detalhes adicionais..."
+                                placeholder="Passos para reproduzir o erro..."
                             />
                         </div>
 
-                        {/* Upload de Imagem */}
+                        {/* 6. Upload */}
                         <div className="grid grid-cols-4 items-start gap-4">
                             <Label className="text-right pt-2">Evidência</Label>
                             <div className="col-span-3">
@@ -232,15 +261,17 @@ export function CreateQAItemModal({
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        className="w-full border-dashed"
+                                        className="w-full border-dashed text-muted-foreground"
                                         onClick={() => fileInputRef.current?.click()}
                                     >
                                         <Upload className="mr-2 h-4 w-4" />
-                                        Upload Imagem
+                                        Anexar Screenshot
                                     </Button>
                                 ) : (
                                     <div className="flex items-center justify-between p-2 border rounded bg-muted/20">
-                                        <span className="text-sm truncate max-w-[200px]">{selectedFile.name}</span>
+                                        <span className="text-sm truncate max-w-[200px] text-foreground">
+                                            {selectedFile.name}
+                                        </span>
                                         <Button
                                             type="button"
                                             variant="ghost"
@@ -256,7 +287,7 @@ export function CreateQAItemModal({
 
                     </div>
                     <DialogFooter>
-                        <Button type="submit" disabled={loading || !categoryId}>
+                        <Button type="submit" disabled={loading || !categoryId || !selectedTeamId}>
                             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                             Criar Tarefa
                         </Button>

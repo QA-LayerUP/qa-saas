@@ -15,15 +15,12 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Users, Loader2 } from 'lucide-react'
+import { Loader2, Plus } from 'lucide-react'
 
-interface CreateTeamModalProps {
-    projectId: string
-}
-
-export function CreateTeamModal({ projectId }: CreateTeamModalProps) {
+export function CreateTeamGlobalModal() {
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
+    
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
     
@@ -35,10 +32,10 @@ export function CreateTeamModal({ projectId }: CreateTeamModalProps) {
         setLoading(true)
 
         try {
+            // Criação simples, sem project_id
             const { error } = await supabase
                 .from('teams')
                 .insert([{ 
-                    project_id: projectId,
                     name,
                     description 
                 }])
@@ -51,6 +48,7 @@ export function CreateTeamModal({ projectId }: CreateTeamModalProps) {
             router.refresh()
         } catch (error) {
             console.error('Erro ao criar time:', error)
+            alert('Erro ao criar time.')
         } finally {
             setLoading(false)
         }
@@ -59,17 +57,17 @@ export function CreateTeamModal({ projectId }: CreateTeamModalProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                    <Users className="mr-2 h-4 w-4" />
+                <Button>
+                    <Plus className="mr-2 h-4 w-4" />
                     Novo Time
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Criar Time</DialogTitle>
+                        <DialogTitle>Criar Novo Time</DialogTitle>
                         <DialogDescription>
-                            Adicione um time (Squad) para organizar as tarefas (ex: Dev, UX, CS).
+                            Crie um Squad Global (ex: QA, Dev, Design) para usar nos projetos.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -86,6 +84,7 @@ export function CreateTeamModal({ projectId }: CreateTeamModalProps) {
                                 required
                             />
                         </div>
+
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="desc" className="text-right">
                                 Descrição

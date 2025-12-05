@@ -2,7 +2,10 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function GET(_request: Request, context: { params: any }) {
+export async function GET(
+  _request: Request, 
+  context: { params: Promise<{ id: string, teamId: string }> } // Atualização para Next.js 15+
+) {
   try {
     const params = await context.params
     const projectId = params.id
@@ -14,6 +17,7 @@ export async function GET(_request: Request, context: { params: any }) {
 
     const supabase = await createClient()
 
+    // A lógica continua válida pois qa_categories tem as duas chaves estrangeiras
     const { data, error } = await supabase
       .from('qa_categories')
       .select('*')

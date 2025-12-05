@@ -2,8 +2,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function GET(_request: Request, context: { params: any }) {
+export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
   try {
+    // Em Next.js 15+, params é uma Promise
     const params = await context.params
     const projectId = params.id
 
@@ -13,18 +14,33 @@ export async function GET(_request: Request, context: { params: any }) {
 
     const supabase = await createClient()
 
+    // --- MUDANÇA PRINCIPAL AQUI ---
+    // Antes: Buscava em 'teams' filtrando por project_id
+    // Agora: Busca em 'project_teams' e faz JOIN com 'teams'
     const { data, error } = await supabase
-      .from('teams')
-      .select('*')
+      .from('project_teams')
+      .select(`
+        team:teams (
+          id,
+          name,
+          description,
+          created_at
+        )
+      `)
       .eq('project_id', projectId)
-      .order('created_at', { ascending: false })
+    // ------------------------------
 
     if (error) {
       console.error('Error fetching teams:', error)
       return NextResponse.json({ error: error.message || error }, { status: 500 })
     }
 
-    return NextResponse.json({ teams: data || [] })
+    // O Supabase retorna algo como: [ { team: { id: 1, name: 'Dev' } }, { team: { ... } } ]
+    // Precisamos "achatar" (flatten) isso para retornar apenas a lista de times limpa
+    const formattedTeams = data?.map((item: any) => item.team) || []
+
+    return NextResponse.json({ teams: formattedTeams })
+    
   } catch (err: any) {
     console.error('Teams list error:', err)
     return NextResponse.json({ error: err?.message || String(err) }, { status: 500 })

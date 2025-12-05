@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type ProjectStatus = 'em_qa' | 'corrigindo' | 'homologando' | 'finalizado';
 export type UserRole = 'ux' | 'dev' | 'content' | 'qa' | 'admin';
 export type QAItemPriority = 'alta' | 'media' | 'baixa';
@@ -10,6 +11,32 @@ export interface Project {
     status: ProjectStatus;
     site_url: string | null;
     created_at: string;
+}
+
+export interface TeamMember {
+    id: string
+    team_id: string
+    user_id: string
+    role?: string
+    user?: UserRole // Join com a tabela users
+    created_at: string
+}
+
+export interface Team {
+    id: string
+    // project_id: string  <-- REMOVIDO
+    name: string
+    description?: string | null
+    created_at: string
+    members?: any[] // opcional para joins
+}
+
+// Nova interface para o vinculo
+export interface ProjectTeam {
+    id: string
+    project_id: string
+    team_id: string
+    team?: Team // Join
 }
 
 export interface QACategory {

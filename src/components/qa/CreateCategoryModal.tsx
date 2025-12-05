@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -40,15 +39,28 @@ export function CreateCategoryModal({ projectId }: CreateCategoryModalProps) {
 
     useEffect(() => {
         const fetchTeams = async () => {
+            setLoadingTeams(true)
             try {
+                // CORREÇÃO: Buscamos na tabela de ligação 'project_teams' e trazemos os dados do time
                 const { data, error } = await supabase
-                    .from('teams')
-                    .select('id, name')
+                    .from('project_teams')
+                    .select(`
+                        team:teams (
+                            id, 
+                            name
+                        )
+                    `)
                     .eq('project_id', projectId)
-                    .order('name')
 
                 if (error) throw error
-                setTeams(data || [])
+
+                // Mapeamos os dados para extrair o objeto 'team' de dentro do array de ligação
+                const formattedTeams = data?.map((item: any) => item.team) || []
+                
+                // Ordena por nome para ficar bonito
+                formattedTeams.sort((a: Team, b: Team) => a.name.localeCompare(b.name))
+
+                setTeams(formattedTeams)
             } catch (err) {
                 console.error('Error fetching teams:', err)
             } finally {
@@ -70,7 +82,11 @@ export function CreateCategoryModal({ projectId }: CreateCategoryModalProps) {
         try {
             const { error } = await supabase
                 .from('qa_categories')
-                .insert([{ project_id: projectId, title, team_id: teamId }])
+                .insert([{ 
+                    project_id: projectId, 
+                    title, 
+                    team_id: teamId 
+                }])
 
             if (error) throw error
 
@@ -79,14 +95,8 @@ export function CreateCategoryModal({ projectId }: CreateCategoryModalProps) {
             setTeamId('')
             router.refresh()
         } catch (error: any) {
-            // Log detalhado para depuração (mostra objeto completo)
-            try {
-                console.error('Error creating category:', error, JSON.stringify(error))
-            } catch (e) {
-                console.error('Error creating category (stringify failed):', error)
-            }
-
-            const message = error?.message || (typeof error === 'string' ? error : JSON.stringify(error))
+            console.error('Error creating category:', error)
+            const message = error?.message || 'Erro desconhecido'
             alert(`Error: ${message}`)
         } finally {
             setLoading(false)
@@ -116,9 +126,13 @@ export function CreateCategoryModal({ projectId }: CreateCategoryModalProps) {
                                     <SelectValue placeholder={loadingTeams ? 'Carregando times...' : 'Selecione um time'} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {teams.map((team) => (
-                                        <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>
-                                    ))}
+                                    {teams.length === 0 && !loadingTeams ? (
+                                        <SelectItem value="none" disabled>Nenhum time vinculado a este projeto</SelectItem>
+                                    ) : (
+                                        teams.map((team) => (
+                                            <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>
+                                        ))
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -131,12 +145,13 @@ export function CreateCategoryModal({ projectId }: CreateCategoryModalProps) {
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 className="col-span-3"
+                                placeholder="Ex: Layout, Funcionalidade, SEO..."
                                 required
                             />
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" disabled={loading || !teamId}>
                             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                             Criar
                         </Button>

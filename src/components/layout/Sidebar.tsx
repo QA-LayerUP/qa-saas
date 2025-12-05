@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { LayoutDashboard, FolderKanban, ListTodo, Settings, LogOut, User } from 'lucide-react'
+import { LayoutDashboard, FolderKanban, ListTodo, Settings, LogOut, User, User2 } from 'lucide-react'
+
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -32,6 +33,11 @@ const sidebarItems = [
         title: 'Configurações',
         href: '/settings/profile',
         icon: Settings,
+    },
+    {
+        title: 'Times',
+        href: '/teams',
+        icon: User2,
     },
 ]
 

@@ -2,52 +2,37 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { QACategory, Team } from '@/lib/types' // Importe o tipo Team
+import { CreateQAItemModal } from './CreateQAItemModal'
 import { Button } from '@/components/ui/button'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Camera, FileText } from 'lucide-react'
-import { QACategory } from '@/lib/types'
+import { LayoutGrid, List, Plus } from 'lucide-react'
 
 interface TaskModeSelectorProps {
     categories: QACategory[]
+    teams: Team[] // <--- ADICIONE ISSO
     projectId: string
     hasCategories: boolean
 }
 
-import { CreateQAItemModal } from './CreateQAItemModal'
-
-// ...
-
-export function TaskModeSelector({ categories, projectId, hasCategories }: TaskModeSelectorProps) {
-    const [simpleTaskOpen, setSimpleTaskOpen] = useState(false)
-
-    if (!hasCategories) {
-        return null
-    }
+export function TaskModeSelector({ categories, teams, projectId, hasCategories }: TaskModeSelectorProps) {
+    const [open, setOpen] = useState(false)
 
     return (
-        <>
-            {/* Botão que abre direto o modal de Tarefa Simples */}
-            <Button onClick={() => setSimpleTaskOpen(true)}>
+        <div className="flex items-center gap-2">
+            {/* O Modal agora recebe os teams */}
+            <CreateQAItemModal 
+                categories={categories}
+                teams={teams} // <--- REPASSE AQUI
+                projectId={projectId}
+                open={open}
+                onOpenChange={setOpen}
+                hideTrigger={true}
+            />
+
+            <Button onClick={() => setOpen(true)} size="sm">
                 <Plus className="mr-2 h-4 w-4" />
                 Novo Item
             </Button>
-
-            <CreateQAItemModal
-                categories={categories}
-                projectId={projectId}
-                open={simpleTaskOpen}
-                onOpenChange={setSimpleTaskOpen}
-                hideTrigger
-            />
-        </>
+        </div>
     )
 }
