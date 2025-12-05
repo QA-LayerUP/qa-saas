@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 /**
  * POST /api/projects/:id/tasks
  * Accepts multipart/form-data (preferred) or JSON.
- * Fields accepted: category_id, title, description, priority, assigned_role
+ * Fields accepted: category_id, title, description, priority, assigned_role, page_url
  * If `image` file is provided, uploads to storage and creates qa_evidences record.
  */
 export async function POST(request: Request, context: { params: any }) {
@@ -15,15 +15,21 @@ export async function POST(request: Request, context: { params: any }) {
     const projectId = params.id
 
     const contentType = request.headers.get('content-type') || ''
+    
+    // Variáveis de campos
     let category_id: string | undefined
     let title: string | undefined
     let description: string | undefined
     let priority: string = 'media'
     let assigned_role: string | null = null
     let team_id: string | null = null
+    let page_url: string | null = null // <--- NOVA VARIÁVEL
+    
+    // Variáveis de imagem
     let imageFile: File | null = null
     let imageBase64: string | null = null
 
+    // Lógica de extração (Multipart vs JSON)
     if (contentType.includes('multipart/form-data')) {
       const form = await request.formData()
       category_id = (form.get('category_id') as string) || undefined
@@ -32,6 +38,10 @@ export async function POST(request: Request, context: { params: any }) {
       priority = (form.get('priority') as string) || priority
       assigned_role = (form.get('assigned_role') as string) || null
       team_id = (form.get('team_id') as string) || null
+      
+      // Captura a URL do form
+      page_url = (form.get('page_url') as string) || null 
+
       const file = form.get('image') as File | null
       if (file && file.size) imageFile = file
     } else {
@@ -42,7 +52,11 @@ export async function POST(request: Request, context: { params: any }) {
       priority = body?.priority || priority
       assigned_role = body?.assigned_role || null
       team_id = body?.team_id || null
-      // support base64 payload: { imageBase64: 'data:image/png;base64,...' }
+      
+      // Captura a URL do JSON
+      page_url = body?.page_url || null 
+
+      // support base64 payload
       imageBase64 = body?.imageBase64 || null
     }
 
@@ -64,7 +78,7 @@ export async function POST(request: Request, context: { params: any }) {
 
     // Insert QA item
     const insertPayload: any = {
-      // project_id e team_id REMOVIDOS pois as colunas não existem na tabela qa_items
+      // project_id e team_id REMOVIDOS conforme ajuste anterior
       category_id, 
       title,
       description: description || null,
@@ -72,6 +86,7 @@ export async function POST(request: Request, context: { params: any }) {
       status: 'aberto',
       created_by: user.id,
       assigned_role: assigned_role || null,
+      page_url: page_url || null, // <--- ADICIONADO AO INSERT
     }
 
     const { data: itemData, error: itemError } = await supabase
@@ -91,7 +106,9 @@ export async function POST(request: Request, context: { params: any }) {
 
       if (imageFile) {
         const timestamp = Date.now()
-        const filename = `${projectId}/${timestamp}-${imageFile.name}`
+        // Sanitiza o nome do arquivo para evitar caracteres estranhos
+        const safeName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const filename = `${projectId}/${timestamp}-${safeName}`
 
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('evidences')
@@ -106,7 +123,6 @@ export async function POST(request: Request, context: { params: any }) {
         const { data: urlData } = supabase.storage.from('evidences').getPublicUrl(uploadData.path)
         publicUrl = urlData.publicUrl
       } else if (imageBase64) {
-        // data:image/png;base64,....
         const matches = imageBase64.match(/^data:(image\/[^;]+);base64,(.+)$/)
         if (matches) {
           const mime = matches[1]
