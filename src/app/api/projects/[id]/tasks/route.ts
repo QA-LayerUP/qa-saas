@@ -9,8 +9,9 @@ import { createClient } from '@/lib/supabase/server'
  * Fields accepted: category_id, title, description, priority, assigned_role
  * If `image` file is provided, uploads to storage and creates qa_evidences record.
  */
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, context: { params: any }) {
   try {
+    const params = await context.params
     const projectId = params.id
 
     const contentType = request.headers.get('content-type') || ''
