@@ -64,7 +64,7 @@ export async function POST(request: Request, context: { params: any }) {
 
     // Insert QA item
     const insertPayload: any = {
-      project_id: projectId,
+    //   project_id: projectId,
       category_id,
       title,
       description: description || null,
