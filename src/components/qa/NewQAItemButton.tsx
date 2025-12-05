@@ -25,8 +25,7 @@ export function NewQAItemButton({ categories, projectId }: NewQAItemButtonProps)
                 projectId={projectId}
                 open={open}
                 onOpenChange={setOpen}
-                hideTrigger={true}
-            />
+                hideTrigger={true} teams={[]}            />
         </>
     )
 }
