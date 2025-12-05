@@ -16,6 +16,7 @@ export interface QACategory {
     id: string;
     project_id: string;
     title: string;
+    team_id?: string | null;
     created_at: string;
 }
 
@@ -30,6 +31,7 @@ export interface User {
 export interface QAItem {
     id: string;
     category_id: string;
+    team_id?: string | null;
     title: string;
     description: string | null;
     priority: QAItemPriority;

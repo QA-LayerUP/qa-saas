@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { createClient } from '@/lib/supabase/server'
 import { CreateCategoryModal } from '@/components/qa/CreateCategoryModal'
@@ -5,6 +6,7 @@ import { CreateTeamModal } from '@/components/teams/CreateTeamModal'
 import { TaskModeSelector } from '@/components/qa/TaskModeSelector'
 import { NewQAItemButton } from '@/components/qa/NewQAItemButton'
 import { QAItemCard } from '@/components/qa/QAItemCard'
+import TeamTabContent from '@/components/qa/TeamTabContent'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { QAItem, QACategory } from '@/lib/types'
 
@@ -23,19 +25,34 @@ export default async function ProjectQAPage({ params }: ProjectQAPageProps) {
         .eq('id', projectId)
         .single()
 
-    // Fetch categories
+    // Fetch teams
+    const { data: teams } = await supabase
+        .from('teams')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: true })
+
+    // Fetch categories (all for project)
     const { data: categories } = await supabase
         .from('qa_categories')
         .select('*')
         .eq('project_id', projectId)
         .order('created_at')
 
-    // Fetch items
-    const { data: items } = await supabase
-        .from('qa_items')
-        .select('*')
-        .in('category_id', (categories || []).map(c => c.id))
-        .order('created_at', { ascending: false })
+    // Fetch items for project
+    let items: any[] | undefined = []
+    const categoryIds = (categories || []).map(c => c.id)
+    if (categoryIds.length > 0) {
+        const res = await supabase
+            .from('qa_items')
+            .select('*, qa_evidences(file_url)')
+            .in('category_id', categoryIds)
+            .order('created_at', { ascending: false })
+
+        // CORREÇÃO AQUI:
+        // Se res.data for null, usamos [] para evitar o erro de tipo
+        items = res.data || [] 
+    }
 
     const itemsByCategory: Record<string, QAItem[]> = {}
     if (items) {
@@ -46,6 +63,14 @@ export default async function ProjectQAPage({ params }: ProjectQAPageProps) {
             itemsByCategory[item.category_id].push(item)
         })
     }
+
+    // Group categories by team for quick lookup
+    const categoriesByTeam: Record<string, QACategory[]> = {}
+    ;(categories || []).forEach((c) => {
+        const t = c.team_id || 'unassigned'
+        if (!categoriesByTeam[t]) categoriesByTeam[t] = []
+        categoriesByTeam[t].push(c)
+    })
 
     return (
         <div className="flex flex-col gap-6 h-full">
@@ -76,36 +101,30 @@ export default async function ProjectQAPage({ params }: ProjectQAPageProps) {
                 </div>
             </div>
 
-            {(categories || []).length === 0 ? (
+            {(teams || []).length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-64 border rounded-lg bg-muted/10 border-dashed">
-                    <p className="text-muted-foreground mb-4">Nenhuma categoria criada ainda.</p>
-                    <CreateCategoryModal projectId={projectId} />
+                    <p className="text-muted-foreground mb-4">Nenhum time criado ainda.</p>
+                    <CreateTeamModal projectId={projectId} />
                 </div>
             ) : (
-                <Tabs defaultValue={categories?.[0]?.id} className="w-full">
+                <Tabs defaultValue={teams?.[0]?.id} className="w-full">
                     <TabsList className="w-full justify-start overflow-x-auto">
-                        {categories?.map((category) => (
-                            <TabsTrigger key={category.id} value={category.id}>
-                                {category.title}
-                                <span className="ml-2 rounded-full bg-muted-foreground/20 px-2 py-0.5 text-xs">
-                                    {itemsByCategory[category.id]?.length || 0}
-                                </span>
+                        {teams?.map((team) => (
+                            <TabsTrigger key={team.id} value={team.id}>
+                                {team.name}
                             </TabsTrigger>
                         ))}
                     </TabsList>
-                    {categories?.map((category) => (
-                        <TabsContent key={category.id} value={category.id} className="mt-6">
-                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                {itemsByCategory[category.id]?.length > 0 ? (
-                                    itemsByCategory[category.id].map((item) => (
-                                        <QAItemCard key={item.id} item={item} projectId={projectId} />
-                                    ))
-                                ) : (
-                                    <div className="col-span-full flex h-32 items-center justify-center rounded-lg border border-dashed text-muted-foreground">
-                                        Nenhum item nesta categoria.
-                                    </div>
-                                )}
-                            </div>
+
+                    {teams?.map((team) => (
+                        <TabsContent key={team.id} value={team.id} className="mt-6">
+                            {/* Client component handles filters + items rendering */}
+                            <TeamTabContent
+                                teamId={team.id}
+                                categories={categories || []}
+                                items={items || []}
+                                projectId={projectId}
+                            />
                         </TabsContent>
                     ))}
                 </Tabs>
