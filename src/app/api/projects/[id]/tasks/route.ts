@@ -64,12 +64,11 @@ export async function POST(request: Request, context: { params: any }) {
 
     // Insert QA item
     const insertPayload: any = {
-    //   project_id: projectId,
-      category_id,
+      // project_id e team_id REMOVIDOS pois as colunas não existem na tabela qa_items
+      category_id, 
       title,
       description: description || null,
       priority,
-      team_id: team_id || null,
       status: 'aberto',
       created_by: user.id,
       assigned_role: assigned_role || null,
