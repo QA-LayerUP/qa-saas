@@ -47,6 +47,17 @@ export interface QACategory {
     created_at: string;
 }
 
+// Adicione junto com os outros tipos
+export interface QALog {
+    id: string
+    qa_item_id: string
+    user_id: string
+    action: string
+    details?: any
+    created_at: string
+    user?: UserRole // Join
+}
+
 export interface User {
     id: string;
     name: string | null;

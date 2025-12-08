@@ -26,9 +26,10 @@ export function RecentProjects({ projects }: RecentProjectsProps) {
                         <p className="text-sm text-muted-foreground">Nenhum projeto encontrado.</p>
                     ) : (
                         projects.map((project) => (
-                            <div
+                            <Link
                                 key={project.id}
-                                className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                                href={`/projects/${project.id}/qa`}
+                                className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors cursor-pointer"
                             >
                                 <div className="space-y-1">
                                     <p className="font-medium leading-none">{project.name}</p>
@@ -42,7 +43,7 @@ export function RecentProjects({ projects }: RecentProjectsProps) {
                                         {project.status.replace('_', ' ')}
                                     </Badge>
                                 </div>
-                            </div>
+                            </Link>
                         ))
                     )}
                 </div>

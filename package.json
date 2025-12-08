@@ -36,6 +36,7 @@
     "react-dom": "19.2.0",
     "react-picture-annotation": "^1.2.0",
     "react-sketch-canvas": "^6.2.0",
+    "recharts": "^3.5.1",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
