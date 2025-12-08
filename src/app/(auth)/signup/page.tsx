@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Loader2 } from 'lucide-react'
+import Image from 'next/image'
 
 export default function SignUpPage() {
     const [name, setName] = useState('')
@@ -53,7 +54,18 @@ export default function SignUpPage() {
     return (
         <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
             <Card className="w-full max-w-md">
-                <CardHeader className="space-y-1">
+                <CardHeader className="space-y-2 flex flex-col items-center">
+                    {/* LOGO ADICIONADA AQUI */}
+                    <div className="mb-2">
+                        <Image 
+                            src="/LOGO-LAYER.png" 
+                            alt="Logo Layer" 
+                            width={180} // Ajuste a largura conforme necessário
+                            height={60} // Ajuste a altura para manter a proporção
+                            className="h-auto w-auto object-contain"
+                            priority
+                        />
+                    </div>
                     <CardTitle className="text-2xl font-bold text-center">Crie sua conta</CardTitle>
                     <CardDescription className="text-center">
                         Comece a gerenciar seus projetos de QA hoje
