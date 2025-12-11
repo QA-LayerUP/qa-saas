@@ -5,6 +5,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import Image from 'next/image' // <--- Importação adicionada
 import { Button } from '@/components/ui/button'
 import { 
     LayoutDashboard, 
@@ -71,10 +72,17 @@ export function Sidebar() {
             {/* Header */}
             <div className="flex h-14 items-center border-b px-4">
                 <Link href="/dashboard" className="flex items-center gap-2 font-bold text-lg tracking-tight">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                        <Puzzle className="h-4 w-4" />
+                    <div className="flex h-7 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                        QA
                     </div>
-                    <span>QA LayerUP</span>
+                    <Image 
+                        src="/LOGO-LAYER.png" 
+                        alt="Logo Layer" 
+                        width={60} // Ajuste a largura conforme necessário
+                        height={25} // Ajuste a altura para manter a proporção
+                        className="h-auto w-auto object-contain"
+                        priority
+                    />
                 </Link>
             </div>
 
