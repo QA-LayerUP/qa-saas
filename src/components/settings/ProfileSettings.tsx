@@ -104,7 +104,7 @@ export function ProfileSettings({ user, teams }: ProfileSettingsProps) {
                     <CardDescription>Atualize seus dados de identificação.</CardDescription>
                 </CardHeader>
                 <form onSubmit={handleUpdateProfile}>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-4 mb-5">
                         <div className="flex flex-col md:flex-row gap-6">
                             {/* Avatar (Visual apenas) */}
                             <div className="flex flex-col items-center gap-2">
@@ -203,7 +203,7 @@ export function ProfileSettings({ user, teams }: ProfileSettingsProps) {
                     <CardDescription>Alterar sua senha de acesso.</CardDescription>
                 </CardHeader>
                 <form onSubmit={handleUpdatePassword}>
-                    <CardContent className="space-y-4 max-w-md">
+                    <CardContent className="space-y-4 mb-5 max-w-md">
                         <div className="grid gap-2">
                             <Label htmlFor="newPass">Nova Senha</Label>
                             <Input 
