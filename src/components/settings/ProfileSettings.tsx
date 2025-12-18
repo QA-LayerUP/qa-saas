@@ -95,21 +95,25 @@ export function ProfileSettings({ user, teams }: ProfileSettingsProps) {
         <div className="space-y-8">
             
             {/* SEÇÃO 1: DADOS DO PERFIL */}
-            <Card>
+            <Card className="rounded-xl border-border">
                 <CardHeader>
                     <div className="flex items-center gap-2">
-                        <User className="h-5 w-5 text-primary" />
-                        <CardTitle>Informações Pessoais</CardTitle>
+                        <div className="rounded-lg bg-[#7900E5]/10 p-2">
+                            <User className="h-5 w-5 text-[#7900E5]" />
+                        </div>
+                        <div>
+                            <CardTitle className="font-montserrat text-lg font-bold">Informações Pessoais</CardTitle>
+                            <CardDescription className="text-xs">Atualize seus dados de identificação.</CardDescription>
+                        </div>
                     </div>
-                    <CardDescription>Atualize seus dados de identificação.</CardDescription>
                 </CardHeader>
                 <form onSubmit={handleUpdateProfile}>
                     <CardContent className="space-y-4 mb-5">
                         <div className="flex flex-col md:flex-row gap-6">
                             {/* Avatar (Visual apenas) */}
                             <div className="flex flex-col items-center gap-2">
-                                <Avatar className="h-20 w-20 border-2 border-muted">
-                                    <AvatarFallback className="text-2xl font-bold bg-slate-100 text-slate-600">
+                                <Avatar className="h-20 w-20 border-2 border-[#7900E5]/30">
+                                    <AvatarFallback className="bg-linear-to-br from-[#7900E5] to-[#7900E5] text-2xl font-bold text-white">
                                         {name?.[0]?.toUpperCase() || 'U'}
                                     </AvatarFallback>
                                 </Avatar>
@@ -145,13 +149,18 @@ export function ProfileSettings({ user, teams }: ProfileSettingsProps) {
                         </div>
 
                         {msgProfile && (
-                            <div className={`text-sm p-2 rounded ${msgProfile.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                            <div className={`rounded-lg border p-3 text-sm ${msgProfile.type === 'success' ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'}`}>
                                 {msgProfile.text}
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="border-t bg-slate-50/50 px-6 py-3">
-                        <Button type="submit" disabled={loadingProfile} size="sm">
+                    <CardFooter className="border-t bg-muted/30 px-6 py-3">
+                        <Button 
+                            type="submit" 
+                            disabled={loadingProfile} 
+                            size="sm"
+                            className="bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6]"
+                        >
                             {loadingProfile ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                             Salvar Perfil
                         </Button>
@@ -160,30 +169,34 @@ export function ProfileSettings({ user, teams }: ProfileSettingsProps) {
             </Card>
 
             {/* SEÇÃO 2: MEUS TIMES */}
-            <Card>
+            <Card className="rounded-xl border-border">
                 <CardHeader>
                     <div className="flex items-center gap-2">
-                        <Users className="h-5 w-5 text-primary" />
-                        <CardTitle>Meus Times</CardTitle>
+                        <div className="rounded-lg bg-[#ffcc00]/10 p-2">
+                            <Users className="h-5 w-5 text-[#ffcc00]" />
+                        </div>
+                        <div>
+                            <CardTitle className="font-montserrat text-lg font-bold">Meus Times</CardTitle>
+                            <CardDescription className="text-xs">Squads globais que você faz parte.</CardDescription>
+                        </div>
                     </div>
-                    <CardDescription>Squads globais que você faz parte.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {teams.length === 0 ? (
-                        <div className="text-center py-6 text-muted-foreground border-2 border-dashed rounded-lg bg-muted/10">
+                        <div className="rounded-xl border-2 border-dashed border-border bg-muted/10 py-8 text-center text-sm text-muted-foreground">
                             Você ainda não faz parte de nenhum time.
                         </div>
                     ) : (
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {teams.map((tm: any) => (
-                                <div key={tm.id} className="flex items-start justify-between p-4 border rounded-lg bg-white shadow-sm hover:border-primary/30 transition-colors">
+                                <div key={tm.id} className="flex items-start justify-between rounded-xl border border-border bg-card p-4 shadow-sm transition-all hover:border-[#ffcc00]/30 hover:shadow-md">
                                     <div className="space-y-1">
-                                        <h4 className="font-semibold text-sm">{tm.team?.name}</h4>
-                                        <p className="text-xs text-muted-foreground line-clamp-1">
+                                        <h4 className="font-montserrat text-sm font-semibold">{tm.team?.name}</h4>
+                                        <p className="line-clamp-1 text-xs text-muted-foreground">
                                             {tm.team?.description || 'Squad Operacional'}
                                         </p>
                                     </div>
-                                    <Badge variant="secondary" className="text-[10px] uppercase">
+                                    <Badge variant="outline" className="border-[#ffcc00]/30 bg-[#ffcc00]/10 text-[10px] uppercase text-[#ffcc00]">
                                         {tm.role || 'Membro'}
                                     </Badge>
                                 </div>
@@ -194,13 +207,17 @@ export function ProfileSettings({ user, teams }: ProfileSettingsProps) {
             </Card>
 
             {/* SEÇÃO 3: SEGURANÇA */}
-            <Card>
+            <Card className="rounded-xl border-border">
                 <CardHeader>
                     <div className="flex items-center gap-2">
-                        <Lock className="h-5 w-5 text-primary" />
-                        <CardTitle>Segurança</CardTitle>
+                        <div className="rounded-lg bg-[#ff0000]/10 p-2">
+                            <Lock className="h-5 w-5 text-[#ff0000]" />
+                        </div>
+                        <div>
+                            <CardTitle className="font-montserrat text-lg font-bold">Segurança</CardTitle>
+                            <CardDescription className="text-xs">Alterar sua senha de acesso.</CardDescription>
+                        </div>
                     </div>
-                    <CardDescription>Alterar sua senha de acesso.</CardDescription>
                 </CardHeader>
                 <form onSubmit={handleUpdatePassword}>
                     <CardContent className="space-y-4 mb-5 max-w-md">
@@ -226,13 +243,19 @@ export function ProfileSettings({ user, teams }: ProfileSettingsProps) {
                         </div>
 
                         {msgPass && (
-                            <div className={`text-sm p-2 rounded ${msgPass.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                            <div className={`rounded-lg border p-3 text-sm ${msgPass.type === 'success' ? 'border-green-200 bg-green-50 text-green-700' : 'border-red-200 bg-red-50 text-red-700'}`}>
                                 {msgPass.text}
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="border-t bg-slate-50/50 px-6 py-3">
-                        <Button type="submit" variant="outline" disabled={loadingPass || !newPassword} size="sm">
+                    <CardFooter className="border-t bg-muted/30 px-6 py-3">
+                        <Button 
+                            type="submit" 
+                            variant="outline" 
+                            disabled={loadingPass || !newPassword} 
+                            size="sm"
+                            className="hover:border-[#ff0000]/30 hover:bg-[#ff0000]/5 hover:text-[#ff0000]"
+                        >
                             {loadingPass ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
                             Atualizar Senha
                         </Button>

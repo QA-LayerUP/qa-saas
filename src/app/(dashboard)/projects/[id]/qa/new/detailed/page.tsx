@@ -35,7 +35,7 @@ export default async function DetailedQAPage({ params }: { params: Promise<{ id:
     }
 
     return (
-        <div className="h-[calc(100vh-4rem)]">
+        <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">
             <FullPageCapture
                 projectId={projectId}
                 siteUrl={project.site_url}

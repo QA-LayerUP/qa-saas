@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Camera, ArrowLeft, Loader2, Copy, Check } from 'lucide-react'
@@ -70,9 +70,9 @@ export function FullPageCapture({ projectId, siteUrl, categoryId }: FullPageCapt
                 setCapturing(false)
             }, 'image/png')
 
-        } catch (err: any) {
+        } catch (err) {
             console.error('❌ Erro na captura:', err)
-            const message = err.message || 'Erro desconhecido ao capturar página'
+            const message = err instanceof Error ? err.message : 'Erro desconhecido ao capturar página'
             alert(`Erro ao capturar: ${message}`)
             setCapturing(false)
         }
@@ -119,9 +119,9 @@ export function FullPageCapture({ projectId, siteUrl, categoryId }: FullPageCapt
             setImageBlob(blob)
             setEditorOpen(true)
 
-        } catch (err: any) {
+        } catch (err) {
             console.error('❌ Erro na captura:', err)
-            const message = err.message || 'Erro desconhecido ao capturar página'
+            const message = err instanceof Error ? err.message : 'Erro desconhecido ao capturar página'
             alert(`Erro ao capturar: ${message}`)
         } finally {
             setCapturing(false)
@@ -167,25 +167,30 @@ export function FullPageCapture({ projectId, siteUrl, categoryId }: FullPageCapt
     }
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex h-full flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b bg-background">
+            <div className="flex items-center justify-between border-b bg-background px-6 py-4">
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" onClick={() => router.back()}>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => router.back()}
+                        className="hover:text-[#7900E5]"
+                    >
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Voltar
                     </Button>
 
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">URL:</span>
-                        <code className="text-sm bg-muted px-2 py-1 rounded max-w-md truncate">
+                        <code className="max-w-md truncate rounded bg-muted px-2 py-1 text-sm font-mono">
                             {siteUrl}
                         </code>
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={handleCopyUrl}
-                            className="w-8 h-8 p-0"
+                            className="h-8 w-8 p-0 hover:text-[#7900E5]"
                         >
                             {copied ? (
                                 <Check className="h-4 w-4 text-green-600" />
@@ -197,7 +202,11 @@ export function FullPageCapture({ projectId, siteUrl, categoryId }: FullPageCapt
                 </div>
 
                 <div className="flex gap-3">
-                    <Button onClick={handleCapture} disabled={capturing}>
+                    <Button 
+                        onClick={handleCapture} 
+                        disabled={capturing}
+                        className="bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6]"
+                    >
                         {capturing ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -206,12 +215,17 @@ export function FullPageCapture({ projectId, siteUrl, categoryId }: FullPageCapt
                         ) : (
                             <>
                                 <Camera className="mr-2 h-4 w-4" />
-                                📸 Screenshot da URL
+                                Screenshot URL
                             </>
                         )}
                     </Button>
 
-                    <Button onClick={handleCaptureLocalUI} disabled={capturing} variant="outline">
+                    <Button 
+                        onClick={handleCaptureLocalUI} 
+                        disabled={capturing} 
+                        variant="outline"
+                        className="hover:border-[#7900E5]/30 hover:bg-[#7900E5]/5 hover:text-[#7900E5]"
+                    >
                         {capturing ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -220,7 +234,7 @@ export function FullPageCapture({ projectId, siteUrl, categoryId }: FullPageCapt
                         ) : (
                             <>
                                 <Camera className="mr-2 h-4 w-4" />
-                                📸 Screenshot Local
+                                Screenshot Local
                             </>
                         )}
                     </Button>
@@ -231,10 +245,10 @@ export function FullPageCapture({ projectId, siteUrl, categoryId }: FullPageCapt
             <div className="flex-1 overflow-auto bg-background p-8">
                 <div
                     ref={pageContentRef}
-                    className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8"
+                    className="mx-auto max-w-4xl rounded-xl bg-card p-8 shadow-lg"
                 >
                     {/* Iframe que mostra o site */}
-                    <div className="border rounded-md overflow-hidden mb-6">
+                    <div className="mb-6 overflow-hidden rounded-lg border">
                         <iframe
                             src={siteUrl}
                             className="w-full border-0 bg-white"
@@ -246,8 +260,8 @@ export function FullPageCapture({ projectId, siteUrl, categoryId }: FullPageCapt
 
                     {/* Info */}
                     <div className="text-center text-sm text-muted-foreground">
-                        <p>Clique em "Capturar Página" para tirar um print</p>
-                        <p className="text-xs mt-2">A captura será feita da página inteira visível</p>
+                        <p>Clique em &quot;Screenshot URL&quot; para capturar a página completa</p>
+                        <p className="mt-2 text-xs">Ou use &quot;Screenshot Local&quot; para capturar a visualização atual</p>
                     </div>
                 </div>
             </div>

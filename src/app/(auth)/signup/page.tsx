@@ -83,15 +83,15 @@ export default function SignUpPage() {
           </Link>
           <ThemeToggle />
         </div>
-        <div className="h-1 w-full bg-linear-to-r from-[#00f5ff] via-[#ff00b8] to-[#ffcc00]" />
+        <div className="h-1 w-full bg-linear-to-r from-[#7900E5] via-[#7900E5] to-[#ffcc00]" />
       </header>
 
       <main className="mx-auto flex min-h-[calc(100vh-4rem-4px)] max-w-lg items-center justify-center px-4 py-10 md:py-16">
         <section className="w-full">
           <Card className="border border-border bg-card shadow-[0_18px_40px_rgba(15,23,42,0.3)] dark:bg-black/70 backdrop-blur-xl">
             <CardHeader className="space-y-2 pb-2 text-center">
-              <p className="font-montserrat text-[10px] font-semibold uppercase tracking-[0.18em] text-[#ff00b8]">
-                // Cadastro interno
+              <p className="font-montserrat text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7900E5] dark:text-white">
+                {'// Cadastro interno'}
               </p>
               <h2 className="font-montserrat text-lg font-semibold">Criar acesso · QA Hub</h2>
               <CardDescription className="text-xs leading-relaxed text-muted-foreground">
@@ -168,7 +168,7 @@ export default function SignUpPage() {
 
                 <Button
                   type="submit"
-                  className="font-montserrat group mt-2 flex w-full items-center justify-center gap-2 bg-[#ff00b8] text-xs font-semibold uppercase tracking-[0.18em] text-white hover:bg-[#ff28c6]"
+                  className="font-montserrat group mt-2 flex w-full items-center justify-center gap-2 bg-[#7900E5] text-xs font-semibold uppercase tracking-[0.18em] text-white hover:bg-[#ff28c6]"
                   disabled={loading}
                 >
                   {loading ? (

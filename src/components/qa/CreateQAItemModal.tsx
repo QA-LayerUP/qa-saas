@@ -136,16 +136,16 @@ export function CreateQAItemModal({
         <Dialog open={open} onOpenChange={setOpen}>
             {!hideTrigger && (
                 <DialogTrigger asChild>
-                    <Button>
+                    <Button className="bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6]">
                         <Plus className="mr-2 h-4 w-4" />
                         Novo Item
                     </Button>
                 </DialogTrigger>
             )}
-            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Novo Item de QA</DialogTitle>
+                        <DialogTitle className="font-montserrat text-xl font-bold">Novo Item de QA</DialogTitle>
                         <DialogDescription>
                             Selecione o time, a categoria e descreva o problema.
                         </DialogDescription>
@@ -287,7 +287,11 @@ export function CreateQAItemModal({
 
                     </div>
                     <DialogFooter>
-                        <Button type="submit" disabled={loading || !categoryId || !selectedTeamId}>
+                        <Button 
+                            type="submit" 
+                            disabled={loading || !categoryId || !selectedTeamId}
+                            className="bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6]"
+                        >
                             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                             Criar Tarefa
                         </Button>

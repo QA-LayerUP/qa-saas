@@ -1,8 +1,12 @@
-export function translateAuthError(error: any): string {
+interface AuthError {
+  message?: string
+  code?: string
+}
+
+export function translateAuthError(error: AuthError | null | undefined): string {
   if (!error) return 'Ocorreu um erro ao processar sua solicitação.'
 
   const message = (error.message as string | undefined)?.toLowerCase() ?? ''
-  const code = (error.code as string | undefined)?.toLowerCase()
 
   // Erros de login / credenciais
   if (message.includes('invalid login credentials') || message.includes('invalid email or password')) {

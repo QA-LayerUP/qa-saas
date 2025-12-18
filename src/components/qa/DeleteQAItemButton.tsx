@@ -71,8 +71,8 @@ export function DeleteQAItemButton({ itemId }: DeleteQAItemButtonProps) {
                 <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-6 w-6 text-muted-foreground hover:text-red-600 hover:bg-red-50"
-                    onClick={(e) => e.stopPropagation()} // Importante para não abrir o card ao clicar na lixeira
+                    className="h-6 w-6 text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400"
+                    onClick={(e) => e.stopPropagation()}
                     title="Cancelar Tarefa"
                 >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -81,26 +81,30 @@ export function DeleteQAItemButton({ itemId }: DeleteQAItemButtonProps) {
             
             <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                 <AlertDialogHeader>
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-full bg-red-100">
-                            <AlertTriangle className="h-5 w-5 text-red-600" />
+                    <div className="flex items-center gap-3">
+                        <div className="rounded-full bg-red-100 p-2 dark:bg-red-950">
+                            <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
                         </div>
-                        <AlertDialogTitle>Cancelar Tarefa?</AlertDialogTitle>
+                        <AlertDialogTitle className="font-montserrat text-lg font-bold">Cancelar Tarefa?</AlertDialogTitle>
                     </div>
-                    <AlertDialogDescription className="pt-2">
+                    <AlertDialogDescription className="pt-3 text-sm">
                         Esta tarefa será movida para a lista de cancelados e sairá do fluxo de trabalho ativo. O histórico será mantido.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 
-                <AlertDialogFooter>
-                    <AlertDialogCancel onClick={(e) => e.stopPropagation()} disabled={loading}>
+                <AlertDialogFooter className="gap-2">
+                    <AlertDialogCancel 
+                        onClick={(e) => e.stopPropagation()} 
+                        disabled={loading}
+                        className="hover:bg-muted"
+                    >
                         Voltar
                     </AlertDialogCancel>
                     
                     <AlertDialogAction 
                         onClick={handleDelete} 
                         disabled={loading}
-                        className="bg-red-600 hover:bg-red-700 text-white focus:ring-red-600"
+                        className="bg-red-600 font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-red-700 focus:ring-red-600"
                     >
                         {loading ? (
                             <>

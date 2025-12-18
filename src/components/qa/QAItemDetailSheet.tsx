@@ -214,43 +214,41 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            {/* CORREÇÃO 1: h-screen e overflow-hidden no Content */}
-            <SheetContent className="w-full sm:max-w-xl md:max-w-4xl p-0 gap-0 bg-slate-50 border-l shadow-2xl flex flex-col h-screen max-h-screen overflow-hidden">
+            <SheetContent className="flex h-screen! w-full flex-col gap-0 overflow-hidden border-l bg-background p-0 shadow-2xl sm:max-w-xl md:max-w-4xl">
                 
                 <SheetHeader className="sr-only">
                     <SheetTitle>Detalhes da Tarefa</SheetTitle>
                     <SheetDescription>Edição e visualização do item</SheetDescription>
                 </SheetHeader>
 
-                {/* CORREÇÃO 2: ScrollArea com flex-1 para ocupar o espaço disponível */}
-                <ScrollArea className="flex-1">
-                    <div className="p-6">
+                {/* ScrollArea com flex-1 para ocupar o espaço disponível */}
+                <ScrollArea className="flex-1 overflow-auto">
+                    <div className="p-6 pb-24">
                         {loading || !item ? (
                             <div className="flex flex-col items-center justify-center h-[50vh] gap-2">
                                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                                 <p className="text-muted-foreground">Carregando detalhes...</p>
                             </div>
                         ) : (
-                            // pb-6 ao invés de pb-20, pois o footer agora está separado
-                            <div className="flex flex-col gap-6 pb-6">
+                            <div className="flex flex-col gap-6">
                                 {/* HEADER */}
                                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                                    <div className="space-y-1 flex-1">
-                                        <div className="flex items-center gap-2 text-muted-foreground text-xs font-mono mb-2">
+                                    <div className="flex-1 space-y-1">
+                                        <div className="mb-2 flex items-center gap-2 text-xs font-mono text-muted-foreground">
                                             <Hash className="h-3 w-3" />
                                             <span>{item.id.slice(0, 8)}</span>
                                         </div>
                                         
-                                        <h2 className="text-2xl font-bold leading-tight text-foreground">
+                                        <h2 className="font-montserrat text-2xl font-bold leading-tight text-foreground">
                                             {item.title}
                                         </h2>
 
-                                        <div className="flex flex-wrap items-center gap-2 mt-3">
+                                        <div className="mt-3 flex flex-wrap items-center gap-2">
                                             <Select 
                                                 value={formData.status} 
                                                 onValueChange={(val) => handleChange('status', val)}
                                             >
-                                                <SelectTrigger className="h-7 w-40 text-xs uppercase font-semibold bg-white border-dashed shadow-sm">
+                                                <SelectTrigger className="h-8 w-44 border-dashed bg-card text-xs font-semibold uppercase shadow-sm">
                                                     <div className="flex items-center gap-2">
                                                         {getStatusIcon(formData.status)}
                                                         <SelectValue />
@@ -269,10 +267,10 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                 value={formData.priority} 
                                                 onValueChange={(val) => handleChange('priority', val)}
                                             >
-                                                <SelectTrigger className={`h-7 w-[100px] text-xs uppercase font-bold border-none shadow-sm text-white
-                                                    ${formData.priority === 'alta' ? 'bg-red-500 hover:bg-red-600' : 
-                                                      formData.priority === 'media' ? 'bg-yellow-500 hover:bg-yellow-600' : 
-                                                      'bg-green-500 hover:bg-green-600'}`
+                                                <SelectTrigger className={`h-8 w-[110px] border-none text-xs font-bold uppercase shadow-sm
+                                                    ${formData.priority === 'alta' ? 'bg-[#7900E5] text-white hover:bg-[#ff28c6] dark:bg-[#7900E5] dark:text-white' : 
+                                                      formData.priority === 'media' ? 'bg-[#ffcc00] text-gray-900 hover:bg-[#ffdb33] dark:bg-[#ffcc00] dark:text-gray-900' : 
+                                                      'bg-accent text-accent-foreground hover:bg-accent/90'}`
                                                 }>
                                                     <SelectValue />
                                                 </SelectTrigger>
@@ -299,28 +297,36 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                     <div className="md:col-span-2 space-y-6">
                                         
                                         <Tabs defaultValue="details" className="w-full">
-                                            <TabsList className="w-full justify-start bg-transparent border-b rounded-none h-auto p-0 gap-6 mb-4">
-                                                <TabsTrigger value="details" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-2">
+                                            <TabsList className="mb-4 h-auto w-full justify-start gap-6 rounded-none border-b bg-transparent p-0">
+                                                <TabsTrigger 
+                                                    value="details" 
+                                                    className="font-montserrat rounded-none border-b-2 border-transparent px-0 py-2 text-sm font-semibold text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
+                                                >
                                                     Detalhes
                                                 </TabsTrigger>
-                                                <TabsTrigger value="history" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-2 flex items-center gap-2">
-                                                    Histórico <Badge variant="secondary" className="px-1 h-4 text-[9px]">{logs.length}</Badge>
+                                                <TabsTrigger 
+                                                    value="history" 
+                                                    className="font-montserrat flex items-center gap-2 rounded-none border-b-2 border-transparent px-0 py-2 text-sm font-semibold text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
+                                                >
+                                                    Histórico <Badge variant="outline" className="h-4 border-border bg-muted px-1 text-[9px]">{logs.length}</Badge>
                                                 </TabsTrigger>
                                             </TabsList>
 
                                             <TabsContent value="details" className="space-y-6">
-                                                <Card className="shadow-sm border-none md:border">
-                                                    <CardHeader className="pb-3"><CardTitle className="text-base">Descrição</CardTitle></CardHeader>
+                                                <Card className="border-none shadow-sm md:border">
+                                                    <CardHeader className="pb-3">
+                                                        <CardTitle className="font-montserrat text-base">Descrição</CardTitle>
+                                                    </CardHeader>
                                                     <CardContent>
-                                                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+                                                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
                                                             {item.description || 'Sem descrição fornecida.'}
                                                         </p>
                                                     </CardContent>
                                                 </Card>
 
-                                                <Card className="shadow-sm border-none md:border">
+                                                <Card className="border-none shadow-sm md:border">
                                                     <CardHeader className="flex flex-row items-center justify-between pb-3">
-                                                        <CardTitle className="text-base">Evidências</CardTitle>
+                                                        <CardTitle className="font-montserrat text-base">Evidências</CardTitle>
                                                         <EvidenceUpload itemId={item.id} />
                                                     </CardHeader>
                                                     <CardContent>
@@ -329,36 +335,36 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                 </Card>
 
                                                 <div className="pt-2">
-                                                    <h3 className="text-lg font-semibold mb-4 text-slate-800">Comentários</h3>
+                                                    <h3 className="font-montserrat mb-4 text-lg font-semibold text-foreground">Comentários</h3>
                                                     <CommentSection itemId={item.id} comments={comments} currentUserId={currentUserId} />
                                                 </div>
                                             </TabsContent>
 
                                             <TabsContent value="history">
-                                                <Card className="shadow-sm border-none md:border bg-white">
-                                                    <CardHeader className="pb-3 border-b bg-slate-50/50">
-                                                        <CardTitle className="text-base flex items-center gap-2">
+                                                <Card className="border-none shadow-sm md:border">
+                                                    <CardHeader className="border-b bg-muted/30 pb-3">
+                                                        <CardTitle className="font-montserrat flex items-center gap-2 text-base">
                                                             <History className="h-4 w-4" /> 
                                                             Linha do Tempo
                                                         </CardTitle>
                                                     </CardHeader>
                                                     <CardContent className="p-0">
-                                                        <div className="divide-y">
+                                                        <div className="divide-y divide-border">
                                                             {logs.length === 0 ? (
                                                                 <p className="p-8 text-center text-sm text-muted-foreground">Nenhuma atividade registrada.</p>
                                                             ) : (
                                                                 logs.map((log) => (
-                                                                    <div key={log.id} className="p-4 flex gap-3 text-sm hover:bg-slate-50/50 transition-colors">
+                                                                    <div key={log.id} className="flex gap-3 p-4 text-sm transition-colors hover:bg-muted/20">
                                                                         <div className="mt-1">
-                                                                            <div className="h-2 w-2 rounded-full bg-slate-300 ring-4 ring-slate-100" />
+                                                                            <div className="h-2 w-2 rounded-full bg-accent ring-4 ring-accent/20" />
                                                                         </div>
                                                                         <div className="flex-1">
-                                                                            <p className="text-slate-700">
-                                                                                <span className="font-semibold text-slate-900">{(item.created_user as any)?.name || 'Sistema'}</span>{' '}
+                                                                            <p className="text-foreground">
+                                                                                <span className="font-semibold text-foreground">{(item.created_user as any)?.name || 'Sistema'}</span>{' '}
                                                                                 {log.action}
                                                                             </p>
                                                                             {formatLogDetails(log)}
-                                                                            <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1">
+                                                                            <p className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground">
                                                                                 <Clock className="h-3 w-3" />
                                                                                 {format(new Date(log.created_at), "dd MMM 'às' HH:mm", { locale: ptBR })}
                                                                             </p>
@@ -375,22 +381,22 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
 
                                     {/* COLUNA DIREITA */}
                                     <div className="space-y-6">
-                                        <Card className="shadow-sm bg-white border-none md:border sticky top-6">
+                                        <Card className="sticky top-6 border-none shadow-sm md:border">
                                             <CardHeader className="pb-3">
-                                                <CardTitle className="text-xs font-bold uppercase text-muted-foreground tracking-wider">
+                                                <CardTitle className="font-montserrat text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                                     Configurações
                                                 </CardTitle>
                                             </CardHeader>
                                             <CardContent className="space-y-5 text-sm">
                                                 <div className="grid gap-1.5">
-                                                    <span className="text-muted-foreground text-xs flex items-center gap-1">
+                                                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                                         <Users className="h-3 w-3" /> Time Responsável
                                                     </span>
                                                     <Select 
                                                         value={formData.team_id} 
                                                         onValueChange={(val) => handleChange('team_id', val)}
                                                     >
-                                                        <SelectTrigger className="w-full bg-slate-50 border-slate-200">
+                                                        <SelectTrigger className="w-full">
                                                             <SelectValue placeholder="Selecione..." />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -404,7 +410,7 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                 <Separator />
 
                                                 <div className="grid gap-1.5">
-                                                    <span className="text-muted-foreground text-xs flex items-center gap-1">
+                                                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                                         <Tag className="h-3 w-3" /> Categoria
                                                     </span>
                                                     <Select 
@@ -412,7 +418,7 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                         onValueChange={(val) => handleChange('category_id', val)}
                                                         disabled={!formData.team_id || availableCategories.length === 0}
                                                     >
-                                                        <SelectTrigger className="w-full bg-slate-50 border-slate-200">
+                                                        <SelectTrigger className="w-full">
                                                             <SelectValue placeholder={
                                                                 !formData.team_id ? "Selecione um time" : 
                                                                 availableCategories.length === 0 ? "Sem categorias" : 
@@ -430,12 +436,12 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                 <Separator />
 
                                                 <div className="grid gap-1.5">
-                                                    <span className="text-muted-foreground text-xs">Reportado por</span>
+                                                    <span className="text-xs text-muted-foreground">Reportado por</span>
                                                     <div className="flex items-center gap-2">
-                                                        <div className="h-5 w-5 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">
+                                                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/20 text-[10px] font-bold text-accent">
                                                             {(item.created_user as any)?.name?.[0]?.toUpperCase() || 'S'}
                                                         </div>
-                                                        <span className="font-medium text-slate-900">{(item.created_user as any)?.name || 'Sistema'}</span>
+                                                        <span className="font-medium text-foreground">{(item.created_user as any)?.name || 'Sistema'}</span>
                                                     </div>
                                                 </div>
 
@@ -443,8 +449,12 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                     <>
                                                         <Separator />
                                                         <div className="grid gap-1.5">
-                                                            <span className="text-muted-foreground text-xs">URL Afetada</span>
-                                                            <a href={item.page_url} target="_blank" className="text-blue-600 hover:underline break-all text-xs font-mono bg-blue-50 p-2 rounded border border-blue-100 block truncate">
+                                                            <span className="text-xs text-muted-foreground">URL Afetada</span>
+                                                            <a 
+                                                                href={item.page_url} 
+                                                                target="_blank" 
+                                                                className="block truncate break-all rounded-lg border border-accent/30 bg-accent/10 p-2 text-xs font-mono text-accent hover:underline"
+                                                            >
                                                                 {item.page_url}
                                                             </a>
                                                         </div>
@@ -459,37 +469,40 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                     </div>
                 </ScrollArea>
 
-                {/* CORREÇÃO 3: Footer com flex-none para não ser esmagado */}
+                {/* Footer fixo */}
                 {!loading && item && (
-                    <SheetFooter className="flex-none p-4 bg-white border-t mt-auto flex flex-row items-center justify-between sm:justify-between w-full z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-                        <div className="text-xs text-muted-foreground hidden sm:block">
-                            Alterações não salvas serão perdidas.
-                        </div>
-                        <div className="flex gap-2 w-full sm:w-auto justify-end">
-                            <Button 
-                                variant="ghost" 
-                                onClick={() => onOpenChange(false)}
-                                disabled={saving}
-                            >
-                                Cancelar
-                            </Button>
-                            <Button 
-                                onClick={handleSaveChanges} 
-                                disabled={saving}
-                                className="min-w-[140px]"
-                            >
-                                {saving ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Salvando...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save className="mr-2 h-4 w-4" />
-                                        Salvar Alterações
-                                    </>
-                                )}
-                            </Button>
+                    <SheetFooter className="flex-none border-t bg-card p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="hidden text-xs text-muted-foreground sm:block">
+                                Alterações não salvas serão perdidas.
+                            </div>
+                            <div className="flex w-full gap-2 sm:w-auto sm:justify-end">
+                                <Button 
+                                    variant="outline" 
+                                    onClick={() => onOpenChange(false)}
+                                    disabled={saving}
+                                    className="flex-1 sm:flex-none"
+                                >
+                                    Cancelar
+                                </Button>
+                                <Button 
+                                    onClick={handleSaveChanges} 
+                                    disabled={saving}
+                                    className="min-w-[140px] flex-1 bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6] sm:flex-none"
+                                >
+                                    {saving ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Salvando...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save className="mr-2 h-4 w-4" />
+                                            Salvar
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
                         </div>
                     </SheetFooter>
                 )}

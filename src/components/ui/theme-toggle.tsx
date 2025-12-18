@@ -10,25 +10,26 @@ type ThemeToggleProps = {
 }
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window === 'undefined') return true
+    
+    const storedTheme = window.localStorage.getItem('theme')
+    const shouldUseDark =
+      storedTheme === 'dark' || (!storedTheme && window.matchMedia?.('(prefers-color-scheme: dark)').matches)
+    
+    return shouldUseDark
+  })
 
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const storedTheme = window.localStorage.getItem('theme')
-    const shouldUseDark =
-      storedTheme === 'dark' || (!storedTheme && window.matchMedia?.('(prefers-color-scheme: dark)').matches)
-
     const root = window.document.documentElement
-
-    if (shouldUseDark) {
+    if (isDark) {
       root.classList.add('dark')
-      setIsDark(true)
     } else {
       root.classList.remove('dark')
-      setIsDark(false)
     }
-  }, [])
+  }, [isDark])
 
   const toggleTheme = () => {
     if (typeof window === 'undefined') return

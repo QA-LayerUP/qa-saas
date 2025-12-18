@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts'
 
@@ -8,20 +9,39 @@ interface DashboardChartsProps {
 }
 
 const COLORS = {
-    aberto: '#ef4444',       // Red
-    em_correcao: '#eab308',  // Yellow
-    em_homologacao: '#3b82f6', // Blue
-    finalizado: '#22c55e',   // Green
+    aberto: '#ef4444',       // Red - mantido para urgência
+    em_correcao: '#ffcc00',  // Amarelo Layer Up
+    em_homologacao: '#e700b9', // Ciano Layer Up
+    finalizado: '#7900E5',   // Ciano Layer Up (sucesso)
     cancelado: '#94a3b8'     // Slate
 }
 
 const PRIORITY_COLORS = {
-    alta: '#ef4444',
-    media: '#eab308',
-    baixa: '#22c55e'
+    alta: '#7900E5',   // Magenta Layer Up
+    media: '#ffcc00',  // Amarelo Layer Up
+    baixa: '#e700b9'   // Ciano Layer Up
 }
 
 export function DashboardCharts({ items }: DashboardChartsProps) {
+    const [isDark, setIsDark] = useState(false)
+
+    // Detectar tema atual
+    useEffect(() => {
+        const checkTheme = () => {
+            setIsDark(document.documentElement.classList.contains('dark'))
+        }
+        
+        checkTheme()
+        
+        // Observar mudanças no tema
+        const observer = new MutationObserver(checkTheme)
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class']
+        })
+        
+        return () => observer.disconnect()
+    }, [])
     
     // Processar dados para o Gráfico de Status
     const statusData = [
@@ -38,12 +58,37 @@ export function DashboardCharts({ items }: DashboardChartsProps) {
         { name: 'Baixa', total: items.filter(i => i.priority === 'baixa').length },
     ]
 
+    // Estilos do tooltip baseados no tema
+    const tooltipStyle = isDark
+        ? {
+              backgroundColor: 'hsl(var(--card))',
+              borderRadius: '8px',
+              border: '1px solid hsl(var(--border))',
+              color: 'hsl(var(--card-foreground))',
+          }
+        : {
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              color: '#1e293b',
+          }
+
+    const tooltipItemStyle = isDark
+        ? { color: 'hsl(var(--card-foreground))' }
+        : { color: '#1e293b' }
+
+    const cursorStyle = isDark
+        ? { fill: 'hsl(var(--muted))' }
+        : { fill: '#f1f5f9' }
+
     return (
         <div className="grid gap-4 md:grid-cols-2">
             {/* Gráfico de Pizza - Status */}
-            <Card>
+            <Card className="border-border bg-card/50 backdrop-blur-sm">
                 <CardHeader>
-                    <CardTitle className="text-sm font-medium">Status das Tarefas</CardTitle>
+                    <CardTitle className="font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        Status das Tarefas
+                    </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="h-[250px] w-full">
@@ -64,10 +109,15 @@ export function DashboardCharts({ items }: DashboardChartsProps) {
                                         ))}
                                     </Pie>
                                     <Tooltip 
-                                        contentStyle={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                                        itemStyle={{ color: '#1e293b' }}
+                                        contentStyle={tooltipStyle}
+                                        itemStyle={tooltipItemStyle}
                                     />
-                                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                                    <Legend 
+                                        verticalAlign="bottom" 
+                                        height={36} 
+                                        iconType="circle"
+                                        wrapperStyle={{ color: isDark ? 'hsl(var(--foreground))' : '#1e293b' }}
+                                    />
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (
@@ -80,19 +130,34 @@ export function DashboardCharts({ items }: DashboardChartsProps) {
             </Card>
 
             {/* Gráfico de Barras - Prioridade */}
-            <Card>
+            <Card className="border-border bg-card/50 backdrop-blur-sm">
                 <CardHeader>
-                    <CardTitle className="text-sm font-medium">Tarefas por Prioridade</CardTitle>
+                    <CardTitle className="font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        Tarefas por Prioridade
+                    </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="h-[250px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={priorityData}>
-                                <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                                <XAxis 
+                                    dataKey="name" 
+                                    fontSize={12} 
+                                    tickLine={false} 
+                                    axisLine={false}
+                                    tick={{ fill: isDark ? 'hsl(var(--muted-foreground))' : '#64748b' }}
+                                />
+                                <YAxis 
+                                    fontSize={12} 
+                                    tickLine={false} 
+                                    axisLine={false} 
+                                    allowDecimals={false}
+                                    tick={{ fill: isDark ? 'hsl(var(--muted-foreground))' : '#64748b' }}
+                                />
                                 <Tooltip 
-                                    cursor={{ fill: '#f1f5f9' }}
-                                    contentStyle={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                                    cursor={cursorStyle}
+                                    contentStyle={tooltipStyle}
+                                    itemStyle={tooltipItemStyle}
                                 />
                                 <Bar dataKey="total" radius={[4, 4, 0, 0]}>
                                     {priorityData.map((entry, index) => (

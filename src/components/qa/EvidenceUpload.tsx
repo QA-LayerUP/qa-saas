@@ -79,7 +79,7 @@ export function EvidenceUpload({ itemId }: EvidenceUploadProps) {
             />
             <Label
                 htmlFor="evidence"
-                className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-4 py-2 hover:bg-muted"
+                className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-4 py-2 text-xs font-medium transition-colors hover:border-[#7900E5]/30 hover:bg-[#7900E5]/5 hover:text-[#7900E5]"
             >
                 {uploading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

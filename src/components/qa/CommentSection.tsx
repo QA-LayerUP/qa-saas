@@ -65,13 +65,15 @@ export function CommentSection({ itemId, comments, currentUserId }: CommentSecti
 
     return (
         <div className="space-y-6">
-            <h3 className="font-semibold text-lg">Comentários</h3>
+            <h3 className="font-montserrat text-lg font-semibold">Comentários</h3>
 
             <div className="space-y-4">
                 {comments.map((comment) => (
                     <div key={comment.id} className="flex gap-3">
                         <Avatar className="h-8 w-8">
-                            <AvatarFallback>{comment.user.name?.[0] || 'U'}</AvatarFallback>
+                            <AvatarFallback className="bg-[#7900E5]/10 text-xs text-[#7900E5]">
+                                {comment.user.name?.[0] || 'U'}
+                            </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 space-y-1">
                             <div className="flex items-center gap-2">
@@ -80,7 +82,7 @@ export function CommentSection({ itemId, comments, currentUserId }: CommentSecti
                                     {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: ptBR })}
                                 </span>
                             </div>
-                            <p className="text-sm text-gray-700 bg-muted/50 p-3 rounded-md">{comment.content}</p>
+                            <p className="rounded-lg border bg-muted/30 p-3 text-sm text-foreground">{comment.content}</p>
                         </div>
                     </div>
                 ))}
@@ -93,7 +95,12 @@ export function CommentSection({ itemId, comments, currentUserId }: CommentSecti
                     placeholder="Escreva um comentário..."
                     className="min-h-20"
                 />
-                <Button type="submit" size="icon" disabled={submitting || !newComment.trim()}>
+                <Button 
+                    type="submit" 
+                    size="icon" 
+                    disabled={submitting || !newComment.trim()}
+                    className="bg-[#7900E5] text-white hover:bg-[#ff28c6]"
+                >
                     {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
             </form>

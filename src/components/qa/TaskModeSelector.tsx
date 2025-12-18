@@ -29,7 +29,11 @@ export function TaskModeSelector({ categories, teams, projectId, hasCategories }
                 hideTrigger={true}
             />
 
-            <Button onClick={() => setOpen(true)} size="sm">
+            <Button 
+                onClick={() => setOpen(true)} 
+                size="sm"
+                className="bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6]"
+            >
                 <Plus className="mr-2 h-4 w-4" />
                 Novo Item
             </Button>

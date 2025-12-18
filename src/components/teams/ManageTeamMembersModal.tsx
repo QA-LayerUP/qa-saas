@@ -256,14 +256,18 @@ export function ManageTeamMembersModal({
 
                     {/* --- FEEDBACK VISUAL (ERRO/SUCESSO) --- */}
                     {errorMsg && (
-                        <div className="mt-2 p-3 rounded-md bg-red-50 border border-red-100 flex items-start gap-2 text-sm text-red-600 animate-in fade-in slide-in-from-top-1">
+                        <div className="mt-2 p-3 rounded-md border flex items-start gap-2 text-sm animate-in fade-in slide-in-from-top-1
+                            bg-destructive/10 border-destructive/30 text-destructive
+                            dark:bg-destructive/20 dark:border-destructive/40">
                             <XCircle className="h-4 w-4 mt-0.5 shrink-0" />
                             <span>{errorMsg}</span>
                         </div>
                     )}
 
                     {successMsg && (
-                        <div className="mt-2 p-3 rounded-md bg-green-50 border border-green-100 flex items-center gap-2 text-sm text-green-600 animate-in fade-in slide-in-from-top-1">
+                        <div className="mt-2 p-3 rounded-md border flex items-center gap-2 text-sm animate-in fade-in slide-in-from-top-1
+                            bg-green-500/10 border-green-500/30 text-green-700
+                            dark:bg-green-500/20 dark:border-green-500/40 dark:text-green-400">
                             <CheckCircle2 className="h-4 w-4 shrink-0" />
                             <span>{successMsg}</span>
                         </div>
@@ -271,21 +275,21 @@ export function ManageTeamMembersModal({
 
                     {/* DROPDOWN DE RESULTADOS */}
                     {searchFocused && (searchTerm.length > 1) && !errorMsg && !successMsg && (
-                        <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg overflow-hidden max-h-60 overflow-y-auto animate-in zoom-in-95 duration-100">
+                        <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg overflow-hidden max-h-60 overflow-y-auto animate-in zoom-in-95 duration-100">
                             {searchResults.map(user => (
                                 <button
                                     key={user.id}
-                                    className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 text-left transition-colors border-b last:border-0 group"
+                                    className="w-full flex items-center gap-3 p-3 hover:bg-muted/50 text-left transition-colors border-b border-border last:border-0 group"
                                     onMouseDown={(e) => {
                                         e.preventDefault()
                                         addExistingUser(user)
                                     }}
                                 >
                                     <Avatar className="h-8 w-8">
-                                        <AvatarFallback>{user.name?.[0] || 'U'}</AvatarFallback>
+                                        <AvatarFallback className="bg-muted/50 text-muted-foreground">{user.name?.[0] || 'U'}</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <p className="text-sm font-medium group-hover:text-primary transition-colors">{user.name || 'Sem nome'}</p>
+                                        <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{user.name || 'Sem nome'}</p>
                                         <p className="text-xs text-muted-foreground">{user.email}</p>
                                     </div>
                                     <div className="ml-auto">
@@ -296,18 +300,18 @@ export function ManageTeamMembersModal({
 
                             {showInviteOption && (
                                 <button
-                                    className="w-full flex items-center gap-3 p-3 hover:bg-blue-50 text-left transition-colors text-blue-600"
+                                    className="w-full flex items-center gap-3 p-3 hover:bg-accent/10 text-left transition-colors text-accent"
                                     onMouseDown={(e) => {
                                         e.preventDefault()
                                         createInvitation()
                                     }}
                                 >
-                                    <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                        <Mail className="h-4 w-4" />
+                                    <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center border border-accent/30">
+                                        <Mail className="h-4 w-4 text-accent" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium">Convidar via E-mail</p>
-                                        <p className="text-xs opacity-70">Enviar convite para {searchTerm}</p>
+                                        <p className="text-xs text-muted-foreground">Enviar convite para {searchTerm}</p>
                                     </div>
                                 </button>
                             )}
@@ -315,7 +319,7 @@ export function ManageTeamMembersModal({
                     )}
                 </div>
 
-                <div className="h-px bg-slate-100 my-2" />
+                <div className="h-px bg-border my-2" />
 
                 {/* LISTAGEM */}
                 <Tabs defaultValue="members" className="w-full">
@@ -332,20 +336,20 @@ export function ManageTeamMembersModal({
                             </div>
                         ) : (
                             members.map(member => (
-                                <div key={member.id} className="flex items-center justify-between p-2 border rounded-lg bg-white hover:border-slate-300 transition-colors">
+                                <div key={member.id} className="flex items-center justify-between p-2 border border-border rounded-lg bg-card hover:border-accent/30 transition-colors">
                                     <div className="flex items-center gap-3">
                                         <Avatar className="h-8 w-8">
-                                            <AvatarFallback className="bg-slate-100 text-xs font-bold text-slate-500 border">
+                                            <AvatarFallback className="bg-muted/50 text-xs font-bold text-muted-foreground border border-border">
                                                 {(member as any).user?.name?.[0]?.toUpperCase() || 'U'}
                                             </AvatarFallback>
                                         </Avatar>
                                         <div>
-                                            <p className="text-sm font-medium">{(member as any).user?.name || 'Usuário'}</p>
+                                            <p className="text-sm font-medium text-foreground">{(member as any).user?.name || 'Usuário'}</p>
                                             <p className="text-xs text-muted-foreground">{(member as any).user?.email}</p>
                                         </div>
                                     </div>
                                     <Button 
-                                        variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-600 hover:bg-red-50"
+                                        variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                                         onClick={() => removeMember(member.id)}
                                         title="Remover do time"
                                     >
@@ -364,18 +368,18 @@ export function ManageTeamMembersModal({
                             </div>
                         ) : (
                             invitations.map(invite => (
-                                <div key={invite.id} className="flex items-center justify-between p-2 border rounded-lg bg-slate-50/50">
+                                <div key={invite.id} className="flex items-center justify-between p-2 border border-border rounded-lg bg-muted/30">
                                     <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center border border-orange-200">
-                                            <Mail className="h-3.5 w-3.5 text-orange-600" />
+                                        <div className="h-8 w-8 rounded-full bg-[#ffcc00]/20 flex items-center justify-center border border-[#ffcc00]/30 dark:bg-[#ffcc00]/30 dark:border-[#ffcc00]/40">
+                                            <Mail className="h-3.5 w-3.5 text-[#ffcc00] dark:text-[#ffd633]" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-slate-700">{invite.email}</p>
-                                            <Badge variant="outline" className="text-[10px] h-4 border-orange-200 text-orange-600 bg-orange-50">Pendente</Badge>
+                                            <p className="text-sm font-medium text-foreground">{invite.email}</p>
+                                            <Badge variant="outline" className="text-[10px] h-4 border-[#ffcc00]/30 text-[#ffcc00] bg-[#ffcc00]/10 dark:border-[#ffcc00]/40 dark:text-[#ffd633] dark:bg-[#ffcc00]/20">Pendente</Badge>
                                         </div>
                                     </div>
                                     <Button 
-                                        variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-600"
+                                        variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                                         onClick={() => cancelInvite(invite.id)}
                                     >
                                         <X className="h-3.5 w-3.5" />

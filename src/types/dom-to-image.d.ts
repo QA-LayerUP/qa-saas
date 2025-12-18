@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare module 'dom-to-image' {
     export function toPng(
         node: HTMLElement,

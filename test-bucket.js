@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Script de teste para verificar acesso ao bucket Supabase
 const { createClient } = require('@supabase/supabase-js');
 

@@ -16,7 +16,10 @@ export function NewQAItemButton({ categories, projectId }: NewQAItemButtonProps)
 
     return (
         <>
-            <Button onClick={() => setOpen(true)}>
+            <Button 
+                onClick={() => setOpen(true)}
+                className="bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6]"
+            >
                 <Plus className="mr-2 h-4 w-4" />
                 Novo Item
             </Button>

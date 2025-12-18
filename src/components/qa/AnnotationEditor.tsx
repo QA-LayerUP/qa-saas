@@ -74,14 +74,32 @@ export function AnnotationEditor({ imageBlob, open, onClose, onSave }: Annotatio
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-6xl w-full h-[90vh] p-0 overflow-hidden flex flex-col">
-                <DialogHeader className="px-6 py-4 border-b shrink-0">
+            <DialogContent className="flex h-[90vh] w-full max-w-6xl flex-col overflow-hidden p-0">
+                <DialogHeader className="shrink-0 border-b px-6 py-4">
                     <div className="flex items-center justify-between">
-                        <DialogTitle>Visualizar Screenshot</DialogTitle>
+                        <div>
+                        <div className="mb-2 flex items-center gap-2">
+                            <div className="h-1 w-6 rounded-full bg-linear-to-r from-[#7900E5] to-[#7900E5]" />
+                            <span className="font-montserrat text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7900E5] dark:text-white">
+                                {'// Screenshot Capturado'}
+                            </span>
+                        </div>
+                            <DialogTitle className="font-montserrat text-xl font-bold">Visualizar Screenshot</DialogTitle>
+                        </div>
 
                         <div className="flex gap-2">
-                            <Button variant="outline" onClick={onClose}>Cancelar</Button>
-                            <Button onClick={handleSave} disabled={saving || !imageLoaded}>
+                            <Button 
+                                variant="outline" 
+                                onClick={onClose}
+                                className="hover:border-border hover:bg-muted"
+                            >
+                                Cancelar
+                            </Button>
+                            <Button 
+                                onClick={handleSave} 
+                                disabled={saving || !imageLoaded}
+                                className="bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6]"
+                            >
                                 {saving ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -99,14 +117,14 @@ export function AnnotationEditor({ imageBlob, open, onClose, onSave }: Annotatio
                 </DialogHeader>
 
                 {/* Imagem */}
-                <div className="flex-1 overflow-auto bg-neutral-900 flex items-center justify-center p-8">
+                <div className="flex flex-1 items-center justify-center overflow-auto bg-neutral-900 p-8">
                     {imageLoaded && imageDataUrl ? (
                         <div className="relative">
                             <img
                                 ref={imgRef}
                                 src={imageDataUrl}
                                 alt="Screenshot capturado"
-                                className="max-w-full max-h-full border border-neutral-700 rounded shadow-lg"
+                                className="max-h-full max-w-full rounded-lg border border-[#7900E5]/20 shadow-lg shadow-[#7900E5]/10"
                                 style={{
                                     maxWidth: '100%',
                                     maxHeight: '100%',
@@ -118,8 +136,8 @@ export function AnnotationEditor({ imageBlob, open, onClose, onSave }: Annotatio
                         </div>
                     ) : (
                         <div className="text-center text-muted-foreground">
-                            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
-                            <p>Carregando imagem...</p>
+                            <Loader2 className="mx-auto mb-2 h-8 w-8 animate-spin text-[#7900E5]" />
+                            <p className="text-sm">Carregando imagem...</p>
                         </div>
                     )}
                 </div>

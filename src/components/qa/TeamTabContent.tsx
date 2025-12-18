@@ -77,9 +77,9 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-        case 'alta': return 'bg-red-100 text-red-800 border-red-200'
-        case 'media': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-        case 'baixa': return 'bg-green-100 text-green-800 border-green-200'
+        case 'alta': return 'bg-[#7900E5]/10 text-[#7900E5] border-[#7900E5]/30 font-semibold'
+        case 'media': return 'bg-[#ffcc00]/10 text-[#ffcc00] border-[#ffcc00]/30 font-semibold'
+        case 'baixa': return 'bg-[#7900E5]/10 text-[#7900E5] border-[#7900E5]/30 font-semibold'
         default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -101,27 +101,46 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
   return (
     <div>
       {/* --- Header de Controles --- */}
-      <div className="flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between mb-6">
+      <div className="mb-6 flex flex-col items-start justify-between gap-4 xl:flex-row xl:items-center">
         
         {/* Filtro de Categorias (Horizontal Scroll) */}
-        <div className="flex gap-2 items-center overflow-x-auto pb-2 xl:pb-0 scrollbar-hide max-w-full flex-1">
-            <button onClick={() => setSelectedCategory('all')} className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors border ${selectedCategory === 'all' ? 'bg-primary text-primary-foreground border-primary' : 'bg-background hover:bg-muted border-input'}`}>
-            Todos
+        <div className="scrollbar-hide flex max-w-full flex-1 items-center gap-2 overflow-x-auto pb-2 xl:pb-0">
+            <button 
+                onClick={() => setSelectedCategory('all')} 
+                className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${
+                    selectedCategory === 'all' 
+                        ? 'border-[#7900E5] bg-[#7900E5] text-white' 
+                        : 'border-border bg-card hover:border-[#7900E5]/30 hover:bg-[#7900E5]/5'
+                }`}
+            >
+                Todos
             </button>
             {categoriesForTeam.map((cat) => (
-            <button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors border flex items-center gap-2 ${selectedCategory === cat.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-background hover:bg-muted border-input'}`}>
+            <button 
+                key={cat.id} 
+                onClick={() => setSelectedCategory(cat.id)} 
+                className={`flex items-center gap-2 whitespace-nowrap rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${
+                    selectedCategory === cat.id 
+                        ? 'border-[#7900E5] bg-[#7900E5] text-white' 
+                        : 'border-border bg-card hover:border-[#7900E5]/30 hover:bg-[#7900E5]/5'
+                }`}
+            >
                 {cat.title}
-                <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] ${selectedCategory === cat.id ? 'bg-primary-foreground/20' : 'bg-muted-foreground/10 text-muted-foreground'}`}>
-                {(itemsForTeam.filter(i => i.category_id === cat.id) || []).length}
+                <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] ${
+                    selectedCategory === cat.id 
+                        ? 'bg-background/20 dark:bg-background/30' 
+                        : 'bg-muted-foreground/10 text-muted-foreground'
+                }`}>
+                    {(itemsForTeam.filter(i => i.category_id === cat.id) || []).length}
                 </span>
             </button>
             ))}
         </div>
 
         {/* Lado Direito: Filtro de Status + View Toggle */}
-        <div className="flex items-center gap-2 w-full xl:w-auto">
+        <div className="flex w-full items-center gap-2 xl:w-auto">
             
-            {/* NOVO: Filtro de Status */}
+            {/* Filtro de Status */}
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                 <SelectTrigger className="h-9 w-[180px] text-xs">
                     <div className="flex items-center gap-2 text-muted-foreground">
@@ -138,15 +157,33 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
                 </SelectContent>
             </Select>
 
-            <div className="w-px h-6 bg-border mx-1 hidden xl:block" />
+            <div className="mx-1 hidden h-6 w-px bg-border xl:block" />
 
             {/* Toggle de Visualização */}
-            <div className="flex items-center bg-muted/50 p-1 rounded-lg border ml-auto xl:ml-0">
-                <Button variant="ghost" size="sm" onClick={() => setViewMode('grid')} className={`h-7 px-2 ${viewMode === 'grid' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
-                    <LayoutGrid className="h-4 w-4 mr-1" /> <span className="text-xs">Grade</span>
+            <div className="ml-auto flex items-center rounded-lg border bg-card p-1 xl:ml-0">
+                <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setViewMode('grid')} 
+                    className={`h-7 px-2 text-xs ${
+                        viewMode === 'grid' 
+                            ? 'bg-[#7900E5] text-white shadow-sm hover:bg-[#7900E5]/90' 
+                            : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                >
+                    <LayoutGrid className="mr-1 h-4 w-4" /> Grade
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setViewMode('list')} className={`h-7 px-2 ${viewMode === 'list' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
-                    <List className="h-4 w-4 mr-1" /> <span className="text-xs">Lista</span>
+                <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setViewMode('list')} 
+                    className={`h-7 px-2 text-xs ${
+                        viewMode === 'list' 
+                            ? 'bg-[#7900E5] text-white shadow-sm hover:bg-[#7900E5]/90' 
+                            : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                >
+                    <List className="mr-1 h-4 w-4" /> Lista
                 </Button>
             </div>
         </div>
@@ -179,21 +216,19 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
 
             {/* LIST VIEW (TABELA ATUALIZADA) */}
             {viewMode === 'list' && (
-                <div className="rounded-md border bg-white overflow-hidden shadow-sm">
+                <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-muted/50 text-muted-foreground font-medium border-b">
+                        <table className="w-full text-left text-sm">
+                            <thead className="border-b bg-muted/50 font-medium text-muted-foreground">
                                 <tr>
-                                    {/* MUDANÇA: Categoria primeiro */}
-                                    <th className="px-4 py-3 w-[150px]">Categoria</th>
-                                    <th className="px-4 py-3 w-[140px]">Status</th>
-                                    <th className="px-4 py-3 w-[100px]">Prioridade</th>
-                                    <th className="px-4 py-3">Título / Descrição</th>
-                                    {/* MUDANÇA: Evidência aqui */}
-                                    <th className="px-4 py-3 w-[120px]">Evidência</th> 
-                                    <th className="px-4 py-3 w-[120px]">URL</th>
-                                    <th className="px-4 py-3 w-20">Resp.</th>
-                                    <th className="px-4 py-3 w-[100px] text-right">Data</th>
+                                    <th className="w-[150px] px-4 py-3 text-xs font-semibold uppercase tracking-wider">Categoria</th>
+                                    <th className="w-[140px] px-4 py-3 text-xs font-semibold uppercase tracking-wider">Status</th>
+                                    <th className="w-[100px] px-4 py-3 text-xs font-semibold uppercase tracking-wider">Prioridade</th>
+                                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider">Título / Descrição</th>
+                                    <th className="w-[120px] px-4 py-3 text-xs font-semibold uppercase tracking-wider">Evidência</th> 
+                                    <th className="w-[120px] px-4 py-3 text-xs font-semibold uppercase tracking-wider">URL</th>
+                                    <th className="w-20 px-4 py-3 text-xs font-semibold uppercase tracking-wider">Resp.</th>
+                                    <th className="w-[100px] px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider">Data</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
@@ -204,14 +239,14 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
                                     return (
                                         <tr 
                                             key={item.id} 
-                                            className="group hover:bg-muted/30 transition-colors cursor-pointer"
+                                            className="group cursor-pointer transition-colors hover:bg-[#7900E5]/5"
                                             onClick={() => setSelectedItemId(item.id)}
                                         >
                                             {/* Coluna 1: Categoria */}
                                             <td className="px-4 py-3 align-top">
                                                 <div className="mt-1">
                                                     {itemCategory ? (
-                                                        <Badge variant="secondary" className="text-[10px] font-normal bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
+                                                        <Badge variant="secondary" className="text-[10px] font-normal bg-muted/50 text-muted-foreground border border-border whitespace-nowrap">
                                                             {itemCategory.title}
                                                         </Badge>
                                                     ) : (
@@ -242,10 +277,10 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
                                             {/* Coluna 4: Título */}
                                             <td className="px-4 py-3 align-top">
                                                 <div className="block py-1">
-                                                    <span className="font-semibold text-foreground hover:text-blue-600 transition-colors block mb-1">
+                                                    <span className="font-montserrat mb-1 block font-semibold text-foreground transition-colors group-hover:text-[#7900E5]">
                                                         {item.title}
                                                     </span>
-                                                    <p className="text-xs text-muted-foreground line-clamp-1 max-w-[300px]">
+                                                    <p className="line-clamp-1 max-w-[300px] text-xs text-muted-foreground">
                                                         {item.description || "Sem descrição"}
                                                     </p>
                                                 </div>
@@ -257,7 +292,7 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
                                                     {evidenceUrl ? (
                                                         <Badge 
                                                             variant="outline" 
-                                                            className="cursor-pointer hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors gap-1 pl-1.5 pr-2 py-0.5 font-normal text-slate-500"
+                                                            className="cursor-pointer gap-1 py-0.5 pl-1.5 pr-2 font-normal text-muted-foreground transition-colors hover:border-[#7900E5]/30 hover:bg-[#7900E5]/5 hover:text-[#7900E5]"
                                                             onClick={(e) => {
                                                                 e.stopPropagation() 
                                                                 setPreviewImage(evidenceUrl)
@@ -280,7 +315,11 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
                                                             href={item.page_url} 
                                                             target="_blank" 
                                                             rel="noopener noreferrer" 
-                                                            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline bg-blue-50 px-2 py-0.5 rounded border border-blue-100"
+                                                            className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md border transition-all
+                                                                text-accent bg-accent/10 border-accent/30
+                                                                hover:bg-accent/20 hover:border-accent/40 hover:text-accent hover:underline
+                                                                dark:bg-accent/20 dark:border-accent/40 dark:text-accent
+                                                                dark:hover:bg-accent/30 dark:hover:border-accent/50"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
                                                             <Globe className="h-3 w-3" />
@@ -292,9 +331,9 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
 
                                             {/* Coluna 7: Responsável */}
                                             <td className="px-4 py-3 align-top">
-                                                <div className="flex items-center gap-2 mt-1">
+                                                <div className="mt-1 flex items-center gap-2">
                                                     <Avatar className="h-6 w-6 border">
-                                                        <AvatarFallback className="text-[10px] bg-slate-100 text-slate-600">
+                                                        <AvatarFallback className="bg-[#7900E5]/10 text-[10px] text-[#7900E5]">
                                                             {item.assigned_to ? 'U' : '?'}
                                                         </AvatarFallback>
                                                     </Avatar>
@@ -315,12 +354,12 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
             )}
         </>
       ) : (
-        <div className="flex flex-col items-center justify-center h-40 rounded-lg border border-dashed bg-muted/10 text-muted-foreground gap-2">
-            <p>Nenhum item encontrado.</p>
+        <div className="flex h-40 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-muted/10 text-muted-foreground">
+            <p className="text-sm">Nenhum item encontrado.</p>
             {(selectedCategory !== 'all' || selectedStatus !== 'all') && (
                 <button 
                     onClick={() => { setSelectedCategory('all'); setSelectedStatus('all') }} 
-                    className="text-sm underline hover:text-foreground"
+                    className="text-sm text-[#7900E5] underline hover:text-[#ff28c6]"
                 >
                     Limpar filtros
                 </button>
@@ -344,13 +383,6 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
             <DialogTitle className="sr-only">Visualização da Evidência</DialogTitle>
             
             <div className="relative w-full h-full flex items-center justify-center">
-                <button 
-                    onClick={() => setPreviewImage(null)}
-                    className="absolute top-6 right-6 z-110 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors backdrop-blur-sm"
-                >
-                    <X className="h-8 w-8" />
-                </button>
-
                 {previewImage && (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img 

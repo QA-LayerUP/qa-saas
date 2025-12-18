@@ -57,7 +57,7 @@ export function CreateTeamGlobalModal() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
+                <Button className="bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6]">
                     <Plus className="mr-2 h-4 w-4" />
                     Novo Time
                 </Button>
@@ -65,8 +65,8 @@ export function CreateTeamGlobalModal() {
             <DialogContent className="sm:max-w-[425px]">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Criar Novo Time</DialogTitle>
-                        <DialogDescription>
+                        <DialogTitle className="font-montserrat text-xl font-bold">Criar Novo Time</DialogTitle>
+                        <DialogDescription className="text-sm">
                             Crie um Squad Global (ex: QA, Dev, Design) para usar nos projetos.
                         </DialogDescription>
                     </DialogHeader>
@@ -99,7 +99,11 @@ export function CreateTeamGlobalModal() {
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button type="submit" disabled={loading}>
+                        <Button 
+                            type="submit" 
+                            disabled={loading}
+                            className="bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6]"
+                        >
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Criar Time
                         </Button>

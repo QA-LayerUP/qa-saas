@@ -106,7 +106,7 @@ export function CreateCategoryModal({ projectId }: CreateCategoryModalProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="hover:border-[#7900E5]/30 hover:bg-[#7900E5]/5 hover:text-[#7900E5]">
                     <Plus className="mr-2 h-4 w-4" />
                     Nova Categoria
                 </Button>
@@ -114,7 +114,7 @@ export function CreateCategoryModal({ projectId }: CreateCategoryModalProps) {
             <DialogContent className="sm:max-w-[425px]">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>Nova Categoria</DialogTitle>
+                        <DialogTitle className="font-montserrat text-xl font-bold">Nova Categoria</DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
@@ -151,7 +151,11 @@ export function CreateCategoryModal({ projectId }: CreateCategoryModalProps) {
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button type="submit" disabled={loading || !teamId}>
+                        <Button 
+                            type="submit" 
+                            disabled={loading || !teamId}
+                            className="bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6]"
+                        >
                             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                             Criar
                         </Button>

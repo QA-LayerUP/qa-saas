@@ -60,37 +60,43 @@ export default async function QAItemPage({ params }: { params: Promise<{ id: str
     }
 
     return (
-        <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <Link href={`/projects/${projectId}/qa`} className="text-muted-foreground hover:text-foreground">
-                        &larr; Voltar
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <Link 
+                        href={`/projects/${projectId}/qa`} 
+                        className="mb-3 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-[#7900E5]"
+                    >
+                        &larr; Voltar para QA
                     </Link>
-                    <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-                        <span className="text-muted-foreground">#{item.id.slice(0, 8)}</span>
+                    <div className="flex items-center gap-2">
+                        <div className="h-1 w-6 rounded-full bg-linear-to-r from-[#7900E5] to-[#7900E5]" />
+                        <span className="font-mono text-xs text-muted-foreground">#{item.id.slice(0, 8)}</span>
+                    </div>
+                    <h1 className="font-montserrat mt-2 text-2xl font-bold tracking-tight">
                         {item.title}
                     </h1>
                 </div>
                 <div className="flex items-center gap-2">
                     {getStatusIcon(item.status)}
-                    <Badge variant="outline" className="uppercase">{item.status.replace('_', ' ')}</Badge>
+                    <Badge variant="outline" className="border-border uppercase">{item.status.replace('_', ' ')}</Badge>
                 </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-3">
-                <div className="md:col-span-2 space-y-6">
-                    <Card>
+                <div className="space-y-6 md:col-span-2">
+                    <Card className="rounded-xl border-border">
                         <CardHeader>
-                            <CardTitle>Descrição</CardTitle>
+                            <CardTitle className="font-montserrat text-base font-semibold">Descrição</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="whitespace-pre-wrap">{item.description || 'Sem descrição.'}</p>
+                            <p className="whitespace-pre-wrap text-sm leading-relaxed">{item.description || 'Sem descrição.'}</p>
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="rounded-xl border-border">
                         <CardHeader className="flex flex-row items-center justify-between">
-                            <CardTitle>Evidências</CardTitle>
+                            <CardTitle className="font-montserrat text-base font-semibold">Evidências</CardTitle>
                             <EvidenceUpload itemId={itemId} />
                         </CardHeader>
                         <CardContent>
@@ -106,9 +112,9 @@ export default async function QAItemPage({ params }: { params: Promise<{ id: str
                 </div>
 
                 <div className="space-y-6">
-                    <Card>
+                    <Card className="rounded-xl border-border">
                         <CardHeader>
-                            <CardTitle className="text-sm font-medium">Detalhes</CardTitle>
+                            <CardTitle className="font-montserrat text-sm font-semibold uppercase tracking-wider text-muted-foreground">Detalhes</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm">
                             <div className="flex justify-between">
@@ -118,7 +124,14 @@ export default async function QAItemPage({ params }: { params: Promise<{ id: str
                             <Separator />
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Prioridade</span>
-                                <Badge variant={item.priority === 'alta' ? 'destructive' : 'secondary'}>
+                                <Badge 
+                                    variant="outline"
+                                    className={`uppercase ${
+                                        item.priority === 'alta' ? 'border-[#7900E5]/30 bg-[#7900E5]/10 text-[#7900E5]' : 
+                                        item.priority === 'media' ? 'border-[#ffcc00]/30 bg-[#ffcc00]/10 text-[#ffcc00]' :
+                                        'border-[#7900E5]/30 bg-[#7900E5]/10 text-[#7900E5]'
+                                    }`}
+                                >
                                     {item.priority}
                                 </Badge>
                             </div>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Script para testar a API de screenshot
 const fetch = require('node-fetch');
 
