@@ -36,8 +36,13 @@ export function RecentProjects({ projects }: RecentProjectsProps) {
                                     project.status === 'homologando' ? 'outline' : 'default'
                                 }
                                 className={
-                                    project.status === 'em_desenvolvimento' ? 'bg-[#ffcc00]/10 text-[#ffcc00] hover:bg-[#ffcc00]/20' :
-                                    project.status === 'homologando' ? 'border-[#7900E5] text-[#7900E5]' : ''
+                                    project.status === 'homologando'
+                                        ? 'bg-[#ffcc00]/10 text-[#ffcc00] hover:bg-[#ffcc00]/20'
+                                        : project.status === 'em_qa'
+                                            ? 'bg-[#7900E5]/10 text-[#7900E5] hover:bg-[#7900E5]/20'
+                                            : project.status === 'corrigindo'
+                                                ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20'
+                                                : ''
                                 }
                             >
                                 {project.status.replace('_', ' ')}
