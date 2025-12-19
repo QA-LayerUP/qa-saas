@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { CreateTeamGlobalModal } from '@/components/teams/CreateTeamGlobalModal'
 import { ManageTeamMembersModal } from '@/components/teams/ManageTeamMembersModal'
-import { UsersList } from '@/components/teams/UsersList'
+// Import atualizado para pegar o tipo UnifiedUser
+import { UsersList, UnifiedUser } from '@/components/teams/UsersList'
 import { InviteUserModal } from '@/components/users/InviteUserModal'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,11 +24,44 @@ export default async function TeamsPage() {
         `)
         .order('name', { ascending: true })
 
-    // 2. Buscamos os usuários
-    const { data: users } = await supabase
+    // 2. Buscamos os usuários REAIS (Ativos/Inativos)
+    const { data: rawUsers } = await supabase
         .from('users')
         .select('*')
         .order('name', { ascending: true })
+
+    // 3. Buscamos os convites PENDENTES
+    const { data: rawInvites } = await supabase
+        .from('user_invites')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+
+    // 4. Unificamos as duas listas para passar para o componente
+    const userList: UnifiedUser[] = [
+        // Mapeia usuários já cadastrados
+        ...(rawUsers || []).map(u => ({
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            role: u.role,
+            status: u.status as 'active' | 'inactive',
+            created_at: u.created_at,
+            avatar_url: u.avatar_url,
+            type: 'user' as const
+        })),
+        // Mapeia convites pendentes
+        ...(rawInvites || []).map(i => ({
+            id: i.id,
+            name: null,
+            email: i.email,
+            role: i.role,
+            status: 'pending' as const,
+            created_at: i.created_at,
+            avatar_url: null,
+            type: 'invite' as const
+        }))
+    ]
 
     return (
         <div className="flex flex-col gap-6 p-6">
@@ -55,7 +89,7 @@ export default async function TeamsPage() {
                         </TabsTrigger>
                         <TabsTrigger value="users" className="gap-2 px-4 text-xs font-semibold uppercase tracking-wide data-[state=active]:bg-white data-[state=active]:text-[#7900E5] data-[state=active]:shadow-sm">
                             <Users className="h-3.5 w-3.5" />
-                            Membros ({users?.length || 0})
+                            Membros ({userList.length})
                         </TabsTrigger>
                     </TabsList>
                 </div>
@@ -134,13 +168,14 @@ export default async function TeamsPage() {
                                 <UserCheck className="h-5 w-5 text-blue-600" />
                                 Base de Usuários
                             </h2>
-                            <p className="text-sm text-muted-foreground">Lista completa de acessos cadastrados.</p>
+                            <p className="text-sm text-muted-foreground">Lista unificada de acessos e convites pendentes.</p>
                         </div>
-                        {/* Botão de convidar usuários inserido aqui */}
+                        {/* Botão de convidar usuários */}
                         <InviteUserModal />
                     </div>
 
-                    <UsersList users={users || []} />
+                    {/* Passamos a lista UNIFICADA (Users + Invites) */}
+                    <UsersList data={userList} />
                 </TabsContent>
 
             </Tabs>
