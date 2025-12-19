@@ -335,7 +335,6 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                 </Card>
 
                                                 <div className="pt-2">
-                                                    <h3 className="font-montserrat mb-4 text-lg font-semibold text-foreground">Comentários</h3>
                                                     <CommentSection itemId={item.id} comments={comments} currentUserId={currentUserId} />
                                                 </div>
                                             </TabsContent>

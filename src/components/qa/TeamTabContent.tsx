@@ -379,7 +379,7 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
 
       {/* --- MODAL LIGHTBOX --- */}
       <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
-        <DialogContent className="max-w-none w-screen h-screen p-0 border-none bg-black/95 flex flex-col items-center justify-center focus:outline-none z-100 rounded-none">
+        <DialogContent className="max-w-none w-screen h-screen p-0 border-none bg-black/95 flex flex-col items-center justify-center focus:outline-none z-100 rounded-none [&>button[data-slot='dialog-close']]:text-white [&>button[data-slot='dialog-close']]:bg-white/10 [&>button[data-slot='dialog-close']]:hover:bg-white/20 [&>button[data-slot='dialog-close']]:border-white/20 [&>button[data-slot='dialog-close']]:rounded-full [&>button[data-slot='dialog-close']]:opacity-100">
             <DialogTitle className="sr-only">Visualização da Evidência</DialogTitle>
             
             <div className="relative w-full h-full flex items-center justify-center">
