@@ -77,7 +77,7 @@ export function EvidencesDisplay({ evidences }: EvidencesDisplayProps) {
 
             {/* Preview em tela cheia da evidência */}
             <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
-                <DialogContent className="z-50 flex h-[85vh] max-w-[90vw] flex-col items-center justify-center border-none bg-black/95 p-0 focus:outline-none" showCloseButton>
+                <DialogContent className="z-50 flex h-[85vh] max-w-[90vw] flex-col items-center justify-center border-none bg-black/95 p-0 focus:outline-none [&>button[data-slot='dialog-close']]:text-white [&>button[data-slot='dialog-close']]:bg-white/10 [&>button[data-slot='dialog-close']]:hover:bg-white/20 [&>button[data-slot='dialog-close']]:border-white/20 [&>button[data-slot='dialog-close']]:rounded-full [&>button[data-slot='dialog-close']]:opacity-100" showCloseButton>
                     <DialogTitle className="sr-only">Visualização da Evidência</DialogTitle>
                     
                     <div className="flex h-full w-full items-center justify-center">

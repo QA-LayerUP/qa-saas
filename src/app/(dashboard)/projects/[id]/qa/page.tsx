@@ -127,16 +127,9 @@ export default async function ProjectQAPage({ params }: ProjectQAPageProps) {
                 <Tabs defaultValue={teams[0]?.id} className="w-full">
                     <div className="relative">
                         <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-xl border border-border bg-linear-to-br from-card/80 to-card/50 p-1.5 shadow-sm backdrop-blur-sm">
-                            {teams.map((team, index) => {
+                            {teams.map((team) => {
                                 const itemsCount = getItemsCountForTeam(team.id)
                                 const openItemsCount = getOpenItemsCountForTeam(team.id)
-                                const colors = [
-                                    'from-[#7900E5] to-[#ff28c6]',
-                                    'from-[#7900E5] to-[#00d4e6]',
-                                    'from-[#ffcc00] to-[#ffd633]',
-                                    'from-[#ff6b6b] to-[#ff8787]',
-                                ]
-                                const colorClass = colors[index % colors.length]
 
                                 return (
                                     <TabsTrigger 
@@ -147,10 +140,10 @@ export default async function ProjectQAPage({ params }: ProjectQAPageProps) {
                                             h-auto min-w-[120px] px-4 py-2.5 rounded-lg
                                             border border-transparent
                                             bg-transparent
-                                            text-muted-foreground
+                                            text-foreground
                                             transition-all duration-200
-                                            hover:bg-accent/10 hover:text-foreground hover:border-accent/20
-                                            data-[state=active]:bg-linear-to-r ${colorClass}
+                                            hover:bg-[#7900E5]/10 hover:text-[#7900E5] hover:border-[#7900E5]/20
+                                            data-[state=active]:bg-linear-to-r from-[#7900E5] to-[#7900E5]
                                             data-[state=active]:text-white
                                             data-[state=active]:border-transparent
                                             data-[state=active]:shadow-md
@@ -159,17 +152,18 @@ export default async function ProjectQAPage({ params }: ProjectQAPageProps) {
                                         `}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <span className="relative z-10">{team.name}</span>
+                                            <span className="relative z-10 font-semibold">{team.name}</span>
                                             {itemsCount > 0 && (
                                                 <Badge 
                                                     variant="secondary"
                                                     className={`
                                                         relative z-10 h-5 min-w-[20px] px-1.5
                                                         text-[10px] font-bold
-                                                        bg-white/20 text-white
-                                                        border-white/30
-                                                        data-[state=active]:bg-white/30
-                                                        group-hover:bg-white/25
+                                                        bg-[#7900E5]/10 text-[#7900E5] border-[#7900E5]/30
+                                                        data-[state=active]:bg-white/20 data-[state=active]:text-white data-[state=active]:border-white/30
+                                                        group-hover:bg-[#7900E5]/20
+                                                        dark:bg-[#7900E5]/20 dark:text-[#7900E5] dark:border-[#7900E5]/40
+                                                        dark:data-[state=active]:bg-white/20 dark:data-[state=active]:text-white dark:data-[state=active]:border-white/30
                                                     `}
                                                 >
                                                     {itemsCount}
@@ -279,7 +273,7 @@ export default async function ProjectQAPage({ params }: ProjectQAPageProps) {
                                             </Button>
                                         }
                                     />
-                                    </div>
+                                </div>
                             </div>
 
                             <TeamTabContent
