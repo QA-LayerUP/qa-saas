@@ -188,7 +188,7 @@ export default function LoginPage() {
               </Link>
 
               <div className="pt-2 text-center text-xs text-muted-foreground">
-                Precisa de acesso ou teve problemas? Fale com o time de Devs (Fernando).
+                Precisa de acesso ou teve problemas? Fale com o time de Devs (Ale Dev).
               </div>
             </CardContent>
           </Card>
