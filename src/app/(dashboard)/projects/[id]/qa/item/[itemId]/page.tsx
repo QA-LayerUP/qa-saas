@@ -63,8 +63,8 @@ export default async function QAItemPage({ params }: { params: Promise<{ id: str
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <Link 
-                        href={`/projects/${projectId}/qa`} 
+                    <Link
+                        href={`/projects/${projectId}/qa`}
                         className="mb-3 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-[#7900E5]"
                     >
                         &larr; Voltar para QA
@@ -100,7 +100,7 @@ export default async function QAItemPage({ params }: { params: Promise<{ id: str
                             <EvidenceUpload itemId={itemId} />
                         </CardHeader>
                         <CardContent>
-                            <EvidencesDisplay evidences={evidences} />
+                            <EvidencesDisplay evidences={evidences} itemId={itemId} />
                         </CardContent>
                     </Card>
 
@@ -124,13 +124,12 @@ export default async function QAItemPage({ params }: { params: Promise<{ id: str
                             <Separator />
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Prioridade</span>
-                                <Badge 
+                                <Badge
                                     variant="outline"
-                                    className={`uppercase ${
-                                        item.priority === 'alta' ? 'border-[#7900E5]/30 bg-[#7900E5]/10 text-[#7900E5]' : 
-                                        item.priority === 'media' ? 'border-[#ffcc00]/30 bg-[#ffcc00]/10 text-[#ffcc00]' :
-                                        'border-[#7900E5]/30 bg-[#7900E5]/10 text-[#7900E5]'
-                                    }`}
+                                    className={`uppercase ${item.priority === 'alta' ? 'border-[#7900E5]/30 bg-[#7900E5]/10 text-[#7900E5]' :
+                                            item.priority === 'media' ? 'border-[#ffcc00]/30 bg-[#ffcc00]/10 text-[#ffcc00]' :
+                                                'border-[#7900E5]/30 bg-[#7900E5]/10 text-[#7900E5]'
+                                        }`}
                                 >
                                     {item.priority}
                                 </Badge>
