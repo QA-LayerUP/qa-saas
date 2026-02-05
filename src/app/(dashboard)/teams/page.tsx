@@ -1,7 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { CreateTeamGlobalModal } from '@/components/teams/CreateTeamGlobalModal'
 import { ManageTeamMembersModal } from '@/components/teams/ManageTeamMembersModal'
-// Import atualizado para pegar o tipo UnifiedUser
 import { UsersList, UnifiedUser } from '@/components/teams/UsersList'
 import { InviteUserModal } from '@/components/users/InviteUserModal'
 
@@ -9,64 +11,129 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Users, Link2, LayoutGrid, UserCheck } from 'lucide-react'
+import { Users, Link2, LayoutGrid, UserCheck, Trash2 } from 'lucide-react'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
-export default async function TeamsPage() {
-    const supabase = await createClient()
+export default function TeamsPage() {
+    const [teams, setTeams] = useState<any[]>([])
+    const [userList, setUserList] = useState<UnifiedUser[]>([])
+    const [loading, setLoading] = useState(true)
+    const [teamToDelete, setTeamToDelete] = useState<any | null>(null)
+    const [deleting, setDeleting] = useState(false)
+    const supabase = createClient()
 
-    // 1. Buscamos os times
-    const { data: teams } = await supabase
-        .from('teams')
-        .select(`
-            *,
-            members:team_members(count),
-            active_projects:project_teams(count)
-        `)
-        .order('name', { ascending: true })
+    useEffect(() => {
+        console.log('TeamsPage mounted')
+        fetchData()
+    }, [])
 
-    // 2. Buscamos os usuários REAIS (Ativos/Inativos)
-    const { data: rawUsers } = await supabase
-        .from('users')
-        .select('*')
-        .order('name', { ascending: true })
+    async function fetchData() {
+        setLoading(true)
+        try {
+            const { data: teamsData } = await supabase
+                .from('teams')
+                .select(`
+                    *,
+                    members:team_members(count),
+                    active_projects:project_teams(count)
+                `)
+                .order('name', { ascending: true })
 
-    // 3. Buscamos os convites PENDENTES
-    const { data: rawInvites } = await supabase
-        .from('user_invites')
-        .select('*')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false })
+            const { data: rawUsers } = await supabase
+                .from('users')
+                .select('*')
+                .order('name', { ascending: true })
 
-    // 4. Unificamos as duas listas para passar para o componente
-    const userList: UnifiedUser[] = [
-        // Mapeia usuários já cadastrados
-        ...(rawUsers || []).map(u => ({
-            id: u.id,
-            name: u.name,
-            email: u.email,
-            role: u.role,
-            status: u.status as 'active' | 'inactive',
-            created_at: u.created_at,
-            avatar_url: u.avatar_url,
-            type: 'user' as const
-        })),
-        // Mapeia convites pendentes
-        ...(rawInvites || []).map(i => ({
-            id: i.id,
-            name: null,
-            email: i.email,
-            role: i.role,
-            status: 'pending' as const,
-            created_at: i.created_at,
-            avatar_url: null,
-            type: 'invite' as const
-        }))
-    ]
+            const { data: rawInvites } = await supabase
+                .from('user_invites')
+                .select('*')
+                .eq('status', 'pending')
+                .order('created_at', { ascending: false })
+
+            const unified: UnifiedUser[] = [
+                ...(rawUsers || []).map(u => ({
+                    id: u.id,
+                    name: u.name,
+                    email: u.email,
+                    role: u.role,
+                    status: u.status as 'active' | 'inactive',
+                    created_at: u.created_at,
+                    avatar_url: u.avatar_url,
+                    type: 'user' as const
+                })),
+                ...(rawInvites || []).map(i => ({
+                    id: i.id,
+                    name: null,
+                    email: i.email,
+                    role: i.role,
+                    status: 'pending' as const,
+                    created_at: i.created_at,
+                    avatar_url: null,
+                    type: 'invite' as const
+                }))
+            ]
+
+            setTeams(teamsData || [])
+            setUserList(unified)
+        } catch (error) {
+            console.error('Error fetching data:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    async function handleDeleteTeam() {
+        console.log('=== DELETE TEAM CALLED ===')
+        console.log('Team to delete:', teamToDelete)
+
+        if (!teamToDelete) {
+            console.log('No team selected, aborting')
+            return
+        }
+
+        setDeleting(true)
+        try {
+            console.log('Calling supabase delete for team ID:', teamToDelete.id)
+            const { error } = await supabase
+                .from('teams')
+                .delete()
+                .eq('id', teamToDelete.id)
+
+            if (error) {
+                console.error('Supabase delete error:', error)
+                throw error
+            }
+
+            console.log('Delete successful, updating UI')
+            setTeams(prev => prev.filter(t => t.id !== teamToDelete.id))
+            setTeamToDelete(null)
+        } catch (error) {
+            console.error('Error deleting team:', error)
+            alert('Erro ao excluir time. Verifique se não há vínculos ativos.')
+        } finally {
+            setDeleting(false)
+        }
+    }
+
+    if (loading) {
+        return (
+            <div className="flex h-64 items-center justify-center">
+                <p className="text-muted-foreground">Carregando...</p>
+            </div>
+        )
+    }
 
     return (
         <div className="flex flex-col gap-6 p-6">
-            
-            {/* CABEÇALHO GERAL DA PÁGINA */}
             <div>
                 <div className="flex items-center gap-2 mb-2">
                     <div className="h-1 w-6 rounded-full bg-linear-to-r from-[#7900E5] to-[#7900E5]" />
@@ -78,9 +145,7 @@ export default async function TeamsPage() {
                 <p className="mt-1 text-sm text-muted-foreground">Gerencie seus squads, permissões e membros da plataforma.</p>
             </div>
 
-            {/* SISTEMA DE ABAS */}
             <Tabs defaultValue="teams" className="w-full space-y-6">
-                
                 <div className="flex items-center justify-between border-b pb-4">
                     <TabsList className="h-10 bg-muted/50 p-1">
                         <TabsTrigger value="teams" className="gap-2 px-4 text-xs font-semibold uppercase tracking-wide data-[state=active]:bg-white data-[state=active]:text-[#7900E5] data-[state=active]:shadow-sm">
@@ -94,10 +159,7 @@ export default async function TeamsPage() {
                     </TabsList>
                 </div>
 
-                {/* --- ABA 1: TIMES --- */}
                 <TabsContent value="teams" className="space-y-6 outline-none animate-in fade-in-50">
-                    
-                    {/* Header Específico da Aba Times com o Botão de Criar */}
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-lg font-bold font-montserrat flex items-center gap-2">
@@ -135,7 +197,7 @@ export default async function TeamsPage() {
                                             </Badge>
                                         </div>
                                     </CardHeader>
-                                    
+
                                     <CardContent className="mt-auto space-y-3">
                                         <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-2.5 text-xs text-muted-foreground">
                                             <Link2 className="h-3.5 w-3.5" />
@@ -144,15 +206,29 @@ export default async function TeamsPage() {
                                             </span>
                                         </div>
 
-                                        <ManageTeamMembersModal 
-                                            team={team}
-                                            triggerButton={
-                                                <Button variant="outline" className="h-9 w-full text-xs hover:border-[#7900E5]/30 hover:bg-[#7900E5]/5 hover:text-[#7900E5]">
-                                                    <Users className="mr-2 h-3.5 w-3.5" />
-                                                    Gerenciar Membros
-                                                </Button>
-                                            }
-                                        />
+                                        <div className="flex gap-2">
+                                            <ManageTeamMembersModal
+                                                team={team}
+                                                triggerButton={
+                                                    <Button variant="outline" className="h-9 flex-1 text-xs hover:border-[#7900E5]/30 hover:bg-[#7900E5]/5 hover:text-[#7900E5]">
+                                                        <Users className="mr-2 h-3.5 w-3.5" />
+                                                        Gerenciar
+                                                    </Button>
+                                                }
+                                            />
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                className="h-9"
+                                                onClick={() => {
+                                                    console.log('=== DELETE BUTTON CLICKED ===')
+                                                    console.log('Team:', team)
+                                                    setTeamToDelete(team)
+                                                }}
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                            </Button>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             ))}
@@ -160,7 +236,6 @@ export default async function TeamsPage() {
                     )}
                 </TabsContent>
 
-                {/* --- ABA 2: USUÁRIOS --- */}
                 <TabsContent value="users" className="space-y-6 outline-none animate-in fade-in-50">
                     <div className="flex items-center justify-between">
                         <div>
@@ -170,15 +245,41 @@ export default async function TeamsPage() {
                             </h2>
                             <p className="text-sm text-muted-foreground">Lista unificada de acessos e convites pendentes.</p>
                         </div>
-                        {/* Botão de convidar usuários */}
                         <InviteUserModal />
                     </div>
 
-                    {/* Passamos a lista UNIFICADA (Users + Invites) */}
                     <UsersList data={userList} />
                 </TabsContent>
-
             </Tabs>
+
+            <AlertDialog open={!!teamToDelete} onOpenChange={(open) => {
+                console.log('=== MODAL OPEN CHANGE ===', open)
+                if (!open) setTeamToDelete(null)
+            }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta ação não pode ser desfeita. Isso excluirá permanentemente o time
+                            <span className="font-bold"> {teamToDelete?.name}</span> e removerá todas as associações.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                console.log('=== CONFIRM BUTTON CLICKED ===')
+                                e.preventDefault()
+                                handleDeleteTeam()
+                            }}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            disabled={deleting}
+                        >
+                            {deleting ? 'Removendo...' : 'Sim, remover'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

@@ -10,18 +10,19 @@ type ThemeToggleProps = {
 }
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window === 'undefined') return true
-    
+  const [mounted, setMounted] = useState(false)
+  const [isDark, setIsDark] = useState(true)
+
+  useEffect(() => {
+    setMounted(true)
     const storedTheme = window.localStorage.getItem('theme')
     const shouldUseDark =
       storedTheme === 'dark' || (!storedTheme && window.matchMedia?.('(prefers-color-scheme: dark)').matches)
-    
-    return shouldUseDark
-  })
+    setIsDark(shouldUseDark)
+  }, [])
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (!mounted) return
 
     const root = window.document.documentElement
     if (isDark) {
@@ -29,11 +30,9 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     } else {
       root.classList.remove('dark')
     }
-  }, [isDark])
+  }, [isDark, mounted])
 
   const toggleTheme = () => {
-    if (typeof window === 'undefined') return
-
     const root = window.document.documentElement
     const nextIsDark = !isDark
 
@@ -46,6 +45,25 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
       root.classList.remove('dark')
       window.localStorage.setItem('theme', 'light')
     }
+  }
+
+  // Prevent hydration mismatch by rendering a placeholder until mounted
+  if (!mounted) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        className={cn(
+          'h-8 w-8 border-border bg-background/80 text-foreground hover:bg-accent hover:text-accent-foreground',
+          'dark:bg-input/40 dark:text-foreground',
+          className
+        )}
+      >
+        <span className="h-4 w-4" /> {/* Placeholder size */}
+        <span className="sr-only">Alternar tema</span>
+      </Button>
+    )
   }
 
   return (

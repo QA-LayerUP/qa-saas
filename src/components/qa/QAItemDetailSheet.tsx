@@ -4,13 +4,13 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { 
-    Sheet, 
-    SheetContent, 
-    SheetTitle, 
-    SheetHeader, 
+import {
+    Sheet,
+    SheetContent,
+    SheetTitle,
+    SheetHeader,
     SheetDescription,
-    SheetFooter 
+    SheetFooter
 } from '@/components/ui/sheet'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,8 +18,9 @@ import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { AlertCircle, Clock, CheckCircle2, Loader2, Maximize2, Hash, Users, Tag, Save, History, Ban } from 'lucide-react'
+import { AlertCircle, Clock, CheckCircle2, Loader2, Maximize2, Hash, Users, Tag, Save, History, Ban, MessageSquare } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
@@ -41,13 +42,15 @@ interface QAItemDetailSheetProps {
 export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAItemDetailSheetProps) {
     const supabase = createClient()
     const router = useRouter()
-    
+
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
-    
+
     const [item, setItem] = useState<any>(null)
-    
+
     const [formData, setFormData] = useState({
+        title: '',
+        description: '',
         status: '',
         priority: '',
         team_id: '',
@@ -59,7 +62,7 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
     const [logs, setLogs] = useState<QALog[]>([])
     const [projectTeams, setProjectTeams] = useState<any[]>([])
     const [projectCategories, setProjectCategories] = useState<any[]>([])
-    
+
     const [currentUserId, setCurrentUserId] = useState<string>('')
 
     useEffect(() => {
@@ -67,10 +70,10 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
             fetchData()
         } else {
             setItem(null)
-            setFormData({ status: '', priority: '', team_id: '', category_id: '' })
+            setFormData({ title: '', description: '', status: '', priority: '', team_id: '', category_id: '' })
             setLogs([])
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, itemId])
 
     async function fetchData() {
@@ -88,10 +91,15 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                 .single()
 
             if (itemError) throw itemError
-            
+
+            console.log('DEBUG: Item Data Fetched:', itemData)
+            console.log('DEBUG: Item Team ID:', itemData.team_id)
+
             setItem(itemData)
-            
+
             setFormData({
+                title: itemData.title,
+                description: itemData.description || '',
                 status: itemData.status,
                 priority: itemData.priority,
                 team_id: itemData.team_id || '',
@@ -99,19 +107,73 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
             })
 
             // 2. Buscas Paralelas
-            const [teamsRes, catsRes, evidencesRes, commentsRes, logsRes] = await Promise.all([
-                supabase.from('project_teams').select('team:teams(id, name)').eq('project_id', projectId),
+            console.log('[TEAMS QUERY] projectId:', projectId)
+            const [teamsRes, catsRes, evidencesRes, logsRes] = await Promise.all([
+                // Buscar apenas times vinculados ao projeto via project_teams
+                supabase
+                    .from('project_teams')
+                    .select('team_id, teams(id, name)')
+                    .eq('project_id', projectId),
                 supabase.from('qa_categories').select('id, title, team_id').eq('project_id', projectId),
                 supabase.from('qa_evidences').select('*').eq('qa_item_id', itemId).order('created_at', { ascending: false }),
-                supabase.from('qa_comments').select(`*, user:users(name, email)`).eq('qa_item_id', itemId).order('created_at'),
                 getItemLogs(supabase, itemId)
             ])
 
-            setProjectTeams(teamsRes.data?.map((pt: any) => pt.team) || [])
+            console.log('[TEAMS QUERY] teamsRes:', teamsRes)
+            console.log('[TEAMS QUERY] teamsRes.data:', teamsRes.data)
+            console.log('[TEAMS QUERY] teamsRes.error:', teamsRes.error)
+
+            // Extrair os times do resultado do JOIN
+            const projectTeamsData = (teamsRes.data || [])
+                .map((pt: any) => pt.teams)
+                .filter((t: any) => t !== null)
+
+            console.log('[TEAMS QUERY] Extracted teams:', projectTeamsData)
+
+            setProjectTeams(projectTeamsData || [])
             setProjectCategories(catsRes.data || [])
             setEvidences(evidencesRes.data || [])
-            setComments(commentsRes.data || [])
             setLogs(logsRes || [])
+
+            // Smart Team Resolution
+            // Se o ID do time salvo não existir na lista do projeto atual (inconsistência de banco),
+            // tentamos encontrar um time com o mesmo NOME na lista válida.
+            let resolvedTeamId = itemData.team_id || ''
+            const validTeamIds = (projectTeamsData || []).map((t: any) => t.id)
+
+            if (resolvedTeamId && !validTeamIds.includes(resolvedTeamId)) {
+                // ID não encontrado, tentar achar por nome
+                if (itemData.team?.name) {
+                    const matchByName = (projectTeamsData || []).find((t: any) => t?.name === itemData.team.name)
+                    if (matchByName) {
+                        resolvedTeamId = matchByName.id
+                    }
+                } else {
+                    // Sem nome para bater, reseta para vazio para não quebrar o select
+                    resolvedTeamId = ''
+                }
+            }
+
+            // Carrega comentários separadamente para poder recarregar depois
+            await loadComments()
+
+            setItem(itemData)
+
+            setFormData({
+                title: itemData.title,
+                description: itemData.description || '',
+                status: itemData.status,
+                priority: itemData.priority,
+                team_id: resolvedTeamId,
+                category_id: itemData.category_id || ''
+            })
+
+            console.log('[TEAM SELECT] Teams loaded:', projectTeamsData)
+            console.log('[TEAM SELECT] Resolved team_id:', resolvedTeamId)
+            console.log('[TEAM SELECT] formData will be set with team_id:', resolvedTeamId)
+
+            // Carrega comentários separadamente para poder recarregar depois
+            await loadComments()
 
         } catch (error) {
             console.error("Erro ao carregar:", error)
@@ -119,6 +181,44 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
             setLoading(false)
         }
     }
+
+    async function loadComments() {
+        if (!itemId) return
+        const { data, error } = await supabase
+            .from('qa_comments')
+            .select(`*, user:users(name, email)`)
+            .eq('qa_item_id', itemId)
+            .order('created_at') // Ascending for reading
+
+        if (!error && data) {
+            setComments(data)
+        }
+    }
+
+    async function reloadEvidencesAndLogs() {
+        if (!itemId) return
+
+        // Reload evidences
+        const { data: evidencesData } = await supabase
+            .from('qa_evidences')
+            .select('*')
+            .eq('qa_item_id', itemId)
+            .order('created_at', { ascending: false })
+
+        setEvidences(evidencesData || [])
+
+        // Reload logs
+        const logsData = await getItemLogs(supabase, itemId)
+        setLogs(logsData || [])
+    }
+
+    const historyEvents = useMemo(() => {
+        const events = [
+            ...logs.map(log => ({ ...log, type: 'log', date: new Date(log.created_at) })),
+            ...comments.map(comment => ({ ...comment, type: 'comment', date: new Date(comment.created_at) }))
+        ]
+        return events.sort((a, b) => b.date.getTime() - a.date.getTime())
+    }, [logs, comments])
 
     const handleChange = (field: string, value: string) => {
         setFormData(prev => {
@@ -132,14 +232,23 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
 
     const handleSaveChanges = async () => {
         if (!item || !currentUserId) return
+
+        // Validação: category_id é obrigatório
+        if (!formData.category_id) {
+            alert('Por favor, selecione uma categoria antes de salvar.')
+            return
+        }
+
         setSaving(true)
 
         try {
             const payload = {
+                title: formData.title,
+                description: formData.description,
                 status: formData.status,
                 priority: formData.priority,
                 team_id: formData.team_id || null,
-                category_id: formData.category_id || null
+                category_id: formData.category_id // Não enviar null, sempre tem valor
             }
 
             const { error } = await supabase
@@ -153,13 +262,13 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
 
             if (formData.status !== item.status) {
                 logsToCreate.push(createLog(supabase, {
-                    itemId: item.id, userId: currentUserId, action: 'alterou o status', 
+                    itemId: item.id, userId: currentUserId, action: 'alterou o status',
                     details: { from: item.status, to: formData.status }
                 }))
             }
             if (formData.priority !== item.priority) {
                 logsToCreate.push(createLog(supabase, {
-                    itemId: item.id, userId: currentUserId, action: 'alterou a prioridade', 
+                    itemId: item.id, userId: currentUserId, action: 'alterou a prioridade',
                     details: { from: item.priority, to: formData.priority }
                 }))
             }
@@ -167,8 +276,20 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                 const oldTeamName = projectTeams.find(t => t.id === item.team_id)?.name || 'Sem time'
                 const newTeamName = projectTeams.find(t => t.id === formData.team_id)?.name || 'Sem time'
                 logsToCreate.push(createLog(supabase, {
-                    itemId: item.id, userId: currentUserId, action: 'alterou o time', 
+                    itemId: item.id, userId: currentUserId, action: 'alterou o time',
                     details: { from: oldTeamName, to: newTeamName }
+                }))
+            }
+            if (formData.title !== item.title) {
+                logsToCreate.push(createLog(supabase, {
+                    itemId: item.id, userId: currentUserId, action: 'editou o título',
+                    details: { from: item.title, to: formData.title }
+                }))
+            }
+            if (formData.description !== (item.description || '')) {
+                logsToCreate.push(createLog(supabase, {
+                    itemId: item.id, userId: currentUserId, action: 'editou a descrição',
+                    details: null
                 }))
             }
 
@@ -204,7 +325,7 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
     const formatLogDetails = (log: QALog) => {
         if (!log.details) return null
         if (log.action.includes('status')) {
-            return <span className="text-xs text-muted-foreground block mt-0.5">de <b className="uppercase">{log.details.from?.replace('_',' ')}</b> para <b className="uppercase">{log.details.to?.replace('_',' ')}</b></span>
+            return <span className="text-xs text-muted-foreground block mt-0.5">de <b className="uppercase">{log.details.from?.replace('_', ' ')}</b> para <b className="uppercase">{log.details.to?.replace('_', ' ')}</b></span>
         }
         if (log.action.includes('time') || log.action.includes('prioridade')) {
             return <span className="text-xs text-muted-foreground block mt-0.5">de <b>{log.details.from}</b> para <b>{log.details.to}</b></span>
@@ -215,7 +336,7 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent className="flex h-screen! w-full flex-col gap-0 overflow-hidden border-l bg-background p-0 shadow-2xl sm:max-w-xl md:max-w-4xl">
-                
+
                 <SheetHeader className="sr-only">
                     <SheetTitle>Detalhes da Tarefa</SheetTitle>
                     <SheetDescription>Edição e visualização do item</SheetDescription>
@@ -238,14 +359,17 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                             <Hash className="h-3 w-3" />
                                             <span>{item.id.slice(0, 8)}</span>
                                         </div>
-                                        
-                                        <h2 className="font-montserrat text-2xl font-bold leading-tight text-foreground">
-                                            {item.title}
-                                        </h2>
+
+                                        <input
+                                            value={formData.title}
+                                            onChange={(e) => handleChange('title', e.target.value)}
+                                            className="font-montserrat text-2xl font-bold leading-tight text-foreground bg-transparent border-none w-full focus:outline-hidden focus:ring-0 px-0"
+                                            placeholder="Título da tarefa"
+                                        />
 
                                         <div className="mt-3 flex flex-wrap items-center gap-2">
-                                            <Select 
-                                                value={formData.status} 
+                                            <Select
+                                                value={formData.status}
                                                 onValueChange={(val) => handleChange('status', val)}
                                             >
                                                 <SelectTrigger className="h-8 w-44 border-dashed bg-card text-xs font-semibold uppercase shadow-sm">
@@ -263,14 +387,14 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                 </SelectContent>
                                             </Select>
 
-                                            <Select 
-                                                value={formData.priority} 
+                                            <Select
+                                                value={formData.priority}
                                                 onValueChange={(val) => handleChange('priority', val)}
                                             >
                                                 <SelectTrigger className={`h-8 w-[110px] border-none text-xs font-bold uppercase shadow-sm
-                                                    ${formData.priority === 'alta' ? 'bg-[#7900E5] text-white hover:bg-[#ff28c6] dark:bg-[#7900E5] dark:text-white' : 
-                                                      formData.priority === 'media' ? 'bg-[#ffcc00] text-gray-900 hover:bg-[#ffdb33] dark:bg-[#ffcc00] dark:text-gray-900' : 
-                                                      'bg-accent text-accent-foreground hover:bg-accent/90'}`
+                                                    ${formData.priority === 'alta' ? 'bg-[#7900E5] text-white hover:bg-[#ff28c6] dark:bg-[#7900E5] dark:text-white' :
+                                                        formData.priority === 'media' ? 'bg-[#ffcc00] text-gray-900 hover:bg-[#ffdb33] dark:bg-[#ffcc00] dark:text-gray-900' :
+                                                            'bg-accent text-accent-foreground hover:bg-accent/90'}`
                                                 }>
                                                     <SelectValue />
                                                 </SelectTrigger>
@@ -282,7 +406,7 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                             </Select>
                                         </div>
                                     </div>
-                                    
+
                                     <Link href={`/projects/${projectId}/qa/item/${item.id}`} target="_blank">
                                         <Button variant="ghost" size="icon" title="Abrir em nova aba">
                                             <Maximize2 className="h-4 w-4" />
@@ -295,20 +419,20 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                 <div className="grid gap-6 md:grid-cols-3">
                                     {/* COLUNA ESQUERDA */}
                                     <div className="md:col-span-2 space-y-6">
-                                        
+
                                         <Tabs defaultValue="details" className="w-full">
                                             <TabsList className="mb-4 h-auto w-full justify-start gap-6 rounded-none border-b bg-transparent p-0">
-                                                <TabsTrigger 
-                                                    value="details" 
+                                                <TabsTrigger
+                                                    value="details"
                                                     className="font-montserrat rounded-none border-b-2 border-transparent px-0 py-2 text-sm font-semibold text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
                                                 >
                                                     Detalhes
                                                 </TabsTrigger>
-                                                <TabsTrigger 
-                                                    value="history" 
+                                                <TabsTrigger
+                                                    value="history"
                                                     className="font-montserrat flex items-center gap-2 rounded-none border-b-2 border-transparent px-0 py-2 text-sm font-semibold text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
                                                 >
-                                                    Histórico <Badge variant="outline" className="h-4 border-border bg-muted px-1 text-[9px]">{logs.length}</Badge>
+                                                    Histórico <Badge variant="outline" className="h-4 border-border bg-muted px-1 text-[9px]">{historyEvents.length}</Badge>
                                                 </TabsTrigger>
                                             </TabsList>
 
@@ -318,24 +442,31 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                         <CardTitle className="font-montserrat text-base">Descrição</CardTitle>
                                                     </CardHeader>
                                                     <CardContent>
-                                                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-                                                            {item.description || 'Sem descrição fornecida.'}
-                                                        </p>
+                                                        <Textarea
+                                                            value={formData.description}
+                                                            onChange={(e) => handleChange('description', e.target.value)}
+                                                            className="min-h-[120px] resize-y"
+                                                            placeholder="Adicione uma descrição..."
+                                                        />
                                                     </CardContent>
                                                 </Card>
 
                                                 <Card className="border-none shadow-sm md:border">
                                                     <CardHeader className="flex flex-row items-center justify-between pb-3">
                                                         <CardTitle className="font-montserrat text-base">Evidências</CardTitle>
-                                                        <EvidenceUpload itemId={item.id} />
+                                                        <EvidenceUpload itemId={item.id} onUploadComplete={reloadEvidencesAndLogs} />
                                                     </CardHeader>
                                                     <CardContent>
-                                                        <EvidencesDisplay evidences={evidences} />
+                                                        <EvidencesDisplay
+                                                            evidences={evidences}
+                                                            itemId={item.id}
+                                                            onDelete={reloadEvidencesAndLogs}
+                                                        />
                                                     </CardContent>
                                                 </Card>
 
                                                 <div className="pt-2">
-                                                    <CommentSection itemId={item.id} comments={comments} currentUserId={currentUserId} />
+                                                    <CommentSection itemId={item.id} comments={comments} currentUserId={currentUserId} onCommentAdded={loadComments} />
                                                 </div>
                                             </TabsContent>
 
@@ -343,29 +474,47 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                 <Card className="border-none shadow-sm md:border">
                                                     <CardHeader className="border-b bg-muted/30 pb-3">
                                                         <CardTitle className="font-montserrat flex items-center gap-2 text-base">
-                                                            <History className="h-4 w-4" /> 
+                                                            <History className="h-4 w-4" />
                                                             Linha do Tempo
                                                         </CardTitle>
                                                     </CardHeader>
                                                     <CardContent className="p-0">
                                                         <div className="divide-y divide-border">
-                                                            {logs.length === 0 ? (
+                                                            {historyEvents.length === 0 ? (
                                                                 <p className="p-8 text-center text-sm text-muted-foreground">Nenhuma atividade registrada.</p>
                                                             ) : (
-                                                                logs.map((log) => (
-                                                                    <div key={log.id} className="flex gap-3 p-4 text-sm transition-colors hover:bg-muted/20">
+                                                                historyEvents.map((event: any) => (
+                                                                    <div key={event.id} className="flex gap-3 p-4 text-sm transition-colors hover:bg-muted/20">
                                                                         <div className="mt-1">
-                                                                            <div className="h-2 w-2 rounded-full bg-accent ring-4 ring-accent/20" />
+                                                                            {event.type === 'comment' ? (
+                                                                                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#7900E5]/10 text-[#7900E5]">
+                                                                                    <MessageSquare className="h-3 w-3" />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="h-2 w-2 rounded-full bg-accent ring-4 ring-accent/20 translate-y-2 translate-x-2" />
+                                                                            )}
                                                                         </div>
                                                                         <div className="flex-1">
-                                                                            <p className="text-foreground">
-                                                                                <span className="font-semibold text-foreground">{(item.created_user as any)?.name || 'Sistema'}</span>{' '}
-                                                                                {log.action}
-                                                                            </p>
-                                                                            {formatLogDetails(log)}
+                                                                            {event.type === 'comment' ? (
+                                                                                <div>
+                                                                                    <div className="flex items-center gap-2">
+                                                                                        <span className="font-semibold text-foreground">{(event.user as any)?.name || 'Usuário'}</span>
+                                                                                        <span className="text-xs text-muted-foreground">adicionou um comentário</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div>
+                                                                                    <p className="text-foreground">
+                                                                                        <span className="font-semibold text-foreground">{(event.user as any)?.name || 'Sistema'}</span>{' '}
+                                                                                        {event.action}
+                                                                                    </p>
+                                                                                    {formatLogDetails(event)}
+                                                                                </div>
+                                                                            )}
+
                                                                             <p className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground">
                                                                                 <Clock className="h-3 w-3" />
-                                                                                {format(new Date(log.created_at), "dd MMM 'às' HH:mm", { locale: ptBR })}
+                                                                                {format(event.date, "dd MMM 'às' HH:mm", { locale: ptBR })}
                                                                             </p>
                                                                         </div>
                                                                     </div>
@@ -391,17 +540,24 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                                         <Users className="h-3 w-3" /> Time Responsável
                                                     </span>
-                                                    <Select 
-                                                        value={formData.team_id} 
-                                                        onValueChange={(val) => handleChange('team_id', val)}
+                                                    <Select
+                                                        value={formData.team_id}
+                                                        onValueChange={(val) => {
+                                                            console.log('[TEAM SELECT] Team changed to:', val)
+                                                            handleChange('team_id', val)
+                                                        }}
                                                     >
                                                         <SelectTrigger className="w-full">
                                                             <SelectValue placeholder="Selecione..." />
                                                         </SelectTrigger>
                                                         <SelectContent>
-                                                            {projectTeams.map(t => (
-                                                                <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                                                            ))}
+                                                            {(() => {
+                                                                console.log('[TEAM SELECT RENDER] projectTeams:', projectTeams)
+                                                                console.log('[TEAM SELECT RENDER] current team_id:', formData.team_id)
+                                                                return projectTeams.map(t => (
+                                                                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                                                                ))
+                                                            })()}
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
@@ -412,16 +568,16 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                                         <Tag className="h-3 w-3" /> Categoria
                                                     </span>
-                                                    <Select 
-                                                        value={formData.category_id} 
+                                                    <Select
+                                                        value={formData.category_id}
                                                         onValueChange={(val) => handleChange('category_id', val)}
                                                         disabled={!formData.team_id || availableCategories.length === 0}
                                                     >
                                                         <SelectTrigger className="w-full">
                                                             <SelectValue placeholder={
-                                                                !formData.team_id ? "Selecione um time" : 
-                                                                availableCategories.length === 0 ? "Sem categorias" : 
-                                                                "Selecionar..."
+                                                                !formData.team_id ? "Selecione um time" :
+                                                                    availableCategories.length === 0 ? "Sem categorias" :
+                                                                        "Selecionar..."
                                                             } />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -449,9 +605,9 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                         <Separator />
                                                         <div className="grid gap-1.5">
                                                             <span className="text-xs text-muted-foreground">URL Afetada</span>
-                                                            <a 
-                                                                href={item.page_url} 
-                                                                target="_blank" 
+                                                            <a
+                                                                href={item.page_url}
+                                                                target="_blank"
                                                                 className="block truncate break-all rounded-lg border border-accent/30 bg-accent/10 p-2 text-xs font-mono text-accent hover:underline"
                                                             >
                                                                 {item.page_url}
@@ -476,16 +632,16 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                 Alterações não salvas serão perdidas.
                             </div>
                             <div className="flex w-full gap-2 sm:w-auto sm:justify-end">
-                                <Button 
-                                    variant="outline" 
+                                <Button
+                                    variant="outline"
                                     onClick={() => onOpenChange(false)}
                                     disabled={saving}
                                     className="flex-1 sm:flex-none"
                                 >
                                     Cancelar
                                 </Button>
-                                <Button 
-                                    onClick={handleSaveChanges} 
+                                <Button
+                                    onClick={handleSaveChanges}
                                     disabled={saving}
                                     className="min-w-[140px] flex-1 bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6] sm:flex-none"
                                 >

@@ -8,12 +8,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loader2, Upload, X, FileText, Image as ImageIcon, Film } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { createLog } from '@/lib/services/logs'
 
 interface EvidenceUploadProps {
     itemId: string
+    onUploadComplete?: () => void
 }
 
-export function EvidenceUpload({ itemId }: EvidenceUploadProps) {
+export function EvidenceUpload({ itemId, onUploadComplete }: EvidenceUploadProps) {
     const [uploading, setUploading] = useState(false)
     const supabase = createClient()
     const router = useRouter()
@@ -57,9 +59,22 @@ export function EvidenceUpload({ itemId }: EvidenceUploadProps) {
                 throw dbError
             }
 
-            router.refresh()
+            // Criar log na timeline
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                await createLog(supabase, {
+                    itemId,
+                    userId: user.id,
+                    action: 'adicionou uma evidência',
+                    details: { file_type: file.type, file_name: file.name }
+                })
+            }
+
+            if (onUploadComplete) {
+                onUploadComplete()
+            }
         } catch (error) {
-            console.error(error)
+            console.error('Error uploading file:', error)
             const message = error instanceof Error ? error.message : 'Unknown error'
             alert(`Error uploading file: ${message}`)
         } finally {

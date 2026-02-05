@@ -27,9 +27,10 @@ interface CommentSectionProps {
     itemId: string
     comments: Comment[]
     currentUserId: string
+    onCommentAdded?: () => void
 }
 
-export function CommentSection({ itemId, comments, currentUserId }: CommentSectionProps) {
+export function CommentSection({ itemId, comments, currentUserId, onCommentAdded }: CommentSectionProps) {
     const [newComment, setNewComment] = useState('')
     const [submitting, setSubmitting] = useState(false)
     const supabase = createClient()
@@ -54,7 +55,10 @@ export function CommentSection({ itemId, comments, currentUserId }: CommentSecti
             if (error) throw error
 
             setNewComment('')
-            router.refresh()
+            // router.refresh() // Removido para evitar reload total
+            if (onCommentAdded) {
+                onCommentAdded()
+            }
         } catch (error: any) {
             console.error('Error posting comment:', error)
             alert(`Error posting comment: ${error.message || 'Unknown error'}`)
@@ -95,9 +99,9 @@ export function CommentSection({ itemId, comments, currentUserId }: CommentSecti
                     placeholder="Escreva um comentário..."
                     className="min-h-20"
                 />
-                <Button 
-                    type="submit" 
-                    size="icon" 
+                <Button
+                    type="submit"
+                    size="icon"
                     disabled={submitting || !newComment.trim()}
                     className="bg-[#7900E5] text-white hover:bg-[#ff28c6]"
                 >
