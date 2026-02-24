@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
@@ -7,13 +6,13 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import { translateAuthError } from '@/lib/auth-errors'
+import { translateAuthError, type AuthError } from '@/lib/auth-errors'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { AlertCircle, Loader2, Mail, ArrowRight, Chrome, Lock } from 'lucide-react'
+import { AlertCircle, Loader2, Mail, ArrowRight, Lock } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -38,8 +37,8 @@ export default function LoginPage() {
 
       router.push('/dashboard')
       router.refresh()
-    } catch (err: any) {
-      setError(translateAuthError(err))
+    } catch (err: unknown) {
+      setError(translateAuthError(err as AuthError))
     } finally {
       setLoading(false)
     }
@@ -58,8 +57,8 @@ export default function LoginPage() {
       })
 
       if (error) throw error
-    } catch (err: any) {
-      setError(translateAuthError(err))
+    } catch (err: unknown) {
+      setError(translateAuthError(err as AuthError))
       setLoading(false)
     }
   }
@@ -134,9 +133,18 @@ export default function LoginPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="password" className="text-xs font-medium">
-                    Senha
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-xs font-medium">
+                      Senha
+                    </Label>
+                    <Link
+                      href="/forgot-password"
+                      className="text-[10px] font-medium text-[#7900E5] hover:text-[#ff28c6] dark:text-[#ff28c6] dark:hover:text-[#ffcc00] transition-colors"
+                      tabIndex={-1}
+                    >
+                      Esqueceu a senha?
+                    </Link>
+                  </div>
                   <div className="relative">
                     <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-xs text-muted-foreground">
                       <Lock className="h-4 w-4" />

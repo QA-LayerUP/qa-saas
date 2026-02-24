@@ -1,4 +1,4 @@
-interface AuthError {
+export interface AuthError {
   message?: string
   code?: string
 }
