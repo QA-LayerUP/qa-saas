@@ -4,14 +4,15 @@ import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CreateQAItemModal } from './CreateQAItemModal'
-import { QACategory } from '@/lib/types'
+import { QACategory, Team } from '@/lib/types'
 
 interface NewQAItemButtonProps {
     categories: QACategory[]
+    teams: Team[]
     projectId: string
 }
 
-export function NewQAItemButton({ categories, projectId }: NewQAItemButtonProps) {
+export function NewQAItemButton({ categories, teams, projectId }: NewQAItemButtonProps) {
     const [open, setOpen] = useState(false)
 
     return (
@@ -25,10 +26,12 @@ export function NewQAItemButton({ categories, projectId }: NewQAItemButtonProps)
             </Button>
             <CreateQAItemModal
                 categories={categories}
+                teams={teams}
                 projectId={projectId}
                 open={open}
                 onOpenChange={setOpen}
-                hideTrigger={true} teams={[]}            />
+                hideTrigger={true}
+            />
         </>
     )
 }

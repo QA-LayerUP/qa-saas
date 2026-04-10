@@ -110,7 +110,13 @@ export default async function ProjectQAPage({ params }: ProjectQAPageProps) {
                             hasCategories={(categories || []).length > 0}
                         />
                     ) : (
-                        (categories || []).length > 0 && <NewQAItemButton categories={categories || []} projectId={projectId} />
+                        (categories || []).length > 0 && (
+                            <NewQAItemButton
+                                categories={categories || []}
+                                teams={teams}
+                                projectId={projectId}
+                            />
+                        )
                     )}
                 </div>
             </div>
