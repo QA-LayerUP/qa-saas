@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
 import { CreateCategoryModal } from '@/components/qa/CreateCategoryModal'
+import { ManageCategoriesModal } from '@/components/qa/ManageCategoriesModal'
 import { LinkTeamModal } from '@/components/projects/LinkTeamModal'
 import { ManageTeamMembersModal } from '@/components/teams/ManageTeamMembersModal'
 import { TaskModeSelector } from '@/components/qa/TaskModeSelector'
@@ -96,7 +97,12 @@ export default async function ProjectQAPage({ params }: ProjectQAPageProps) {
                 
                 <div className="flex flex-wrap gap-2 items-center">
                     <CreateCategoryModal projectId={projectId} />
-                    
+                    <ManageCategoriesModal
+                        projectId={projectId}
+                        categories={categories || []}
+                        teams={teams}
+                        items={items || []}
+                    />
                     <LinkTeamModal 
                         projectId={projectId} 
                         existingTeamIds={existingTeamIds} 
