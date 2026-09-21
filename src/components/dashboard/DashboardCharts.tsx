@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts'
 
 interface DashboardChartsProps {
-    items: { status: string; priority: string }[]
+    items: { status: string; priority: string | null }[]
 }
 
 const COLORS = {
