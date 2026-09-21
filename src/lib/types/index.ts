@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { QAItemStatus } from '@/lib/qa-status'
+import type { ProjectStatus } from '@/lib/project-status'
 export type { ProjectStatus } from '@/lib/project-status'
 export type { QAItemStatus }
 export type UserRole = 'ux' | 'dev' | 'content' | 'qa' | 'admin';

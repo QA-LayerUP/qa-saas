@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader2, Maximize2, Hash, Users, Tag, Save, History, MessageSquare } from 'lucide-react'
+import { Loader2, Maximize2, Hash, Users, Tag, Save, History, MessageSquare, Clock } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
@@ -33,6 +33,7 @@ import { createLog, getItemLogs } from '@/lib/services/logs'
 import { QA_CATEGORY_LABELS, ensureQaCategory } from '@/lib/qa-categories'
 import { QA_ITEM_STATUSES, QA_ITEM_STATUS_LABELS, qaStatusLabel } from '@/lib/qa-status'
 import { StatusIcon } from '@/components/qa/StatusIcon'
+import { QALog } from '@/lib/types'
 
 interface QAItemDetailSheetProps {
     itemId: string | null
