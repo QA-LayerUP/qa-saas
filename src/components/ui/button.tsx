@@ -5,25 +5,25 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[10px] text-sm font-semibold uppercase tracking-[0.06em] transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-[0.98]",
+        default: "bg-roxo text-white hover:bg-roxo-600",
         destructive:
-          "bg-destructive text-white shadow-sm hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 active:scale-[0.98]",
+          "bg-rosa text-white hover:bg-rosa/90",
         outline:
-          "border border-border bg-background shadow-xs hover:bg-accent/50 hover:text-foreground hover:border-accent dark:bg-input/30 dark:border-input dark:hover:bg-input/50 active:scale-[0.98]",
+          "border border-border bg-transparent text-foreground hover:bg-foreground/5",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80 active:scale-[0.98]",
+          "bg-secondary text-secondary-foreground hover:bg-foreground/10",
         ghost:
-          "hover:bg-accent/50 hover:text-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+          "hover:bg-foreground/5 hover:text-foreground",
+        link: "text-roxo underline-offset-4 hover:underline normal-case tracking-normal dark:text-amarelo",
       },
       size: {
         default: "h-10 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-9 rounded-lg gap-1.5 px-3 text-xs has-[>svg]:px-2.5",
-        lg: "h-11 rounded-lg px-6 has-[>svg]:px-4",
+        sm: "h-9 gap-1.5 px-3 text-xs has-[>svg]:px-2.5",
+        lg: "h-11 px-6 has-[>svg]:px-4",
         icon: "size-10",
         "icon-sm": "size-9",
         "icon-lg": "size-11",

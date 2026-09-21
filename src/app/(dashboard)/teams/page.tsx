@@ -133,26 +133,23 @@ export default function TeamsPage() {
     }
 
     return (
-        <div className="flex flex-col gap-6 p-6">
+        <div className="flex flex-col gap-6">
             <div>
-                <div className="flex items-center gap-2 mb-2">
-                    <div className="h-1 w-6 rounded-full bg-linear-to-r from-[#7900E5] to-[#7900E5]" />
-                    <p className="font-montserrat text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7900E5]">
-                        {'// Gestão Corporativa'}
-                    </p>
-                </div>
-                <h1 className="font-montserrat text-3xl font-bold tracking-tight">Organização</h1>
-                <p className="mt-1 text-sm text-muted-foreground">Gerencie seus squads, permissões e membros da plataforma.</p>
+                <p className="mb-2 text-[11px] font-semibold tracking-[0.22em] text-rosa uppercase dark:text-amarelo">
+                    Gestão corporativa
+                </p>
+                <h1 className="font-mona font-semibold text-2xl uppercase text-foreground">Organização</h1>
+                <p className="mt-2 max-w-2xl text-sm text-foreground/65">Gerencie squads, permissões e membros da plataforma.</p>
             </div>
 
             <Tabs defaultValue="teams" className="w-full space-y-6">
                 <div className="flex items-center justify-between border-b pb-4">
-                    <TabsList className="h-10 bg-muted/50 p-1">
-                        <TabsTrigger value="teams" className="gap-2 px-4 text-xs font-semibold uppercase tracking-wide data-[state=active]:bg-white data-[state=active]:text-[#7900E5] data-[state=active]:shadow-sm">
+                    <TabsList className="h-10 bg-transparent p-0">
+                        <TabsTrigger value="teams" className="gap-2 px-4">
                             <LayoutGrid className="h-3.5 w-3.5" />
                             Times Globais
                         </TabsTrigger>
-                        <TabsTrigger value="users" className="gap-2 px-4 text-xs font-semibold uppercase tracking-wide data-[state=active]:bg-white data-[state=active]:text-[#7900E5] data-[state=active]:shadow-sm">
+                        <TabsTrigger value="users" className="gap-2 px-4">
                             <Users className="h-3.5 w-3.5" />
                             Membros ({userList.length})
                         </TabsTrigger>
@@ -163,7 +160,7 @@ export default function TeamsPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-lg font-bold font-montserrat flex items-center gap-2">
-                                <Users className="h-5 w-5 text-[#7900E5]" />
+                                <Users className="h-5 w-5 text-roxo" />
                                 Squads Ativos
                             </h2>
                             <p className="text-sm text-muted-foreground">Times que podem ser vinculados a projetos.</p>
@@ -172,7 +169,7 @@ export default function TeamsPage() {
                     </div>
 
                     {(!teams || teams.length === 0) ? (
-                        <div className="flex h-64 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/10">
+                        <div className="flex h-64 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-foreground/5">
                             <div className="mb-4 rounded-full bg-muted/50 p-4">
                                 <Users className="h-8 w-8 text-muted-foreground" />
                             </div>
@@ -182,7 +179,7 @@ export default function TeamsPage() {
                     ) : (
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {teams.map((team) => (
-                                <Card key={team.id} className="flex flex-col rounded-xl border-border transition-all hover:border-[#7900E5]/30 hover:shadow-lg hover:shadow-[#7900E5]/5">
+                                <Card key={team.id} className="flex flex-col transition-all hover:border-roxo/40">
                                     <CardHeader className="pb-3">
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
@@ -191,7 +188,7 @@ export default function TeamsPage() {
                                                     {team.description || 'Sem descrição'}
                                                 </CardDescription>
                                             </div>
-                                            <Badge variant="outline" className="flex gap-1 border-[#7900E5]/30 bg-[#7900E5]/10 text-[#7900E5]">
+                                            <Badge variant="outline" className="flex gap-1 border-roxo/30 bg-roxo/10 text-roxo dark:text-[#c9a0ff]">
                                                 <Users className="h-3 w-3" />
                                                 {team.members?.[0]?.count || 0}
                                             </Badge>

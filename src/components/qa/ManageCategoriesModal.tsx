@@ -107,13 +107,13 @@ export function ManageCategoriesModal({
                             Categorias do projeto
                         </DialogTitle>
                         <DialogDescription>
-                            Remover uma categoria apaga também todos os itens de QA associados a ela.
+                            Use isto para limpar categorias antigas. As novas vêm de uma lista fixa ao criar o item. Remover uma categoria apaga também os itens vinculados a ela.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="max-h-[min(360px,50vh)] space-y-2 overflow-y-auto py-2">
                         {sorted.length === 0 ? (
                             <p className="py-6 text-center text-sm text-muted-foreground">
-                                Nenhuma categoria criada ainda.
+                                Nenhuma categoria no banco ainda. Elas são criadas automaticamente ao abrir um item.
                             </p>
                         ) : (
                             sorted.map((cat) => {

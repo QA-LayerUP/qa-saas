@@ -370,12 +370,12 @@ export function ManageTeamMembersModal({
                             invitations.map(invite => (
                                 <div key={invite.id} className="flex items-center justify-between p-2 border border-border rounded-lg bg-muted/30">
                                     <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-full bg-[#ffcc00]/20 flex items-center justify-center border border-[#ffcc00]/30 dark:bg-[#ffcc00]/30 dark:border-[#ffcc00]/40">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#ffcc00]/30 bg-[#ffcc00]/20 dark:border-[#ffcc00]/40 dark:bg-[#ffcc00]/30">
                                             <Mail className="h-3.5 w-3.5 text-[#ffcc00] dark:text-[#ffd633]" />
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-foreground">{invite.email}</p>
-                                            <Badge variant="outline" className="text-[10px] h-4 border-[#ffcc00]/30 text-[#ffcc00] bg-[#ffcc00]/10 dark:border-[#ffcc00]/40 dark:text-[#ffd633] dark:bg-[#ffcc00]/20">Pendente</Badge>
+                                            <Badge variant="outline" className="h-4 border-[#ffcc00]/30 bg-[#ffcc00]/10 text-[10px] text-[#ffcc00] dark:border-[#ffcc00]/40 dark:bg-[#ffcc00]/20 dark:text-[#ffd633]">Pendente</Badge>
                                         </div>
                                     </div>
                                     <Button 

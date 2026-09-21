@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import { Project } from '@/lib/types'
+import { PROJECT_STATUS_BADGE, PROJECT_STATUS_LABELS, normalizeProjectStatus } from '@/lib/project-status'
+import { cn } from '@/lib/utils'
 
 interface RecentProjectsProps {
     projects: Project[]
@@ -19,7 +21,7 @@ export function RecentProjects({ projects }: RecentProjectsProps) {
                         <Link
                             key={project.id}
                             href={`/projects/${project.id}/qa`}
-                            className="group flex items-center justify-between rounded-lg border border-border bg-card/50 p-4 transition-all hover:border-[#7900E5]/30 hover:bg-[#7900E5]/5 hover:shadow-md"
+                            className="group lu-card flex items-center justify-between p-4 hover:border-roxo/40"
                         >
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2">
@@ -31,26 +33,17 @@ export function RecentProjects({ projects }: RecentProjectsProps) {
                                 <p className="text-xs text-muted-foreground">{project.client || 'Sem cliente'}</p>
                             </div>
                             <Badge
-                                variant={
-                                    project.status === 'finalizado' ? 'secondary' :
-                                    project.status === 'homologando' ? 'outline' : 'default'
-                                }
-                                className={
-                                    project.status === 'homologando'
-                                        ? 'bg-[#ffcc00]/10 text-[#ffcc00] hover:bg-[#ffcc00]/20'
-                                        : project.status === 'em_qa'
-                                            ? 'bg-[#7900E5]/10 text-[#7900E5] hover:bg-[#7900E5]/20'
-                                            : project.status === 'corrigindo'
-                                                ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20'
-                                                : ''
-                                }
+                                className={cn(
+                                    PROJECT_STATUS_BADGE[normalizeProjectStatus(project.status)],
+                                    'hover:opacity-90',
+                                )}
                             >
-                                {project.status.replace('_', ' ')}
+                                {PROJECT_STATUS_LABELS[normalizeProjectStatus(project.status)]}
                             </Badge>
                         </Link>
                     ))}
                     <Button variant="ghost" size="sm" asChild className="mt-2 w-full text-xs">
-                        <Link href="/projects" className="gap-1 text-[#7900E5] hover:text-[#ff28c6]">
+                        <Link href="/projects" className="gap-1 text-roxo hover:text-rosa dark:text-amarelo">
                             Ver todos os projetos <ArrowRight className="h-3 w-3" />
                         </Link>
                     </Button>

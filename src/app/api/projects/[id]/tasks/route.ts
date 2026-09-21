@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createLog } from '@/lib/services/logs'
 
 /**
  * POST /api/projects/:id/tasks
@@ -99,6 +100,12 @@ export async function POST(request: Request, context: { params: any }) {
       console.error('Error inserting qa_item:', itemError)
       return NextResponse.json({ error: itemError.message || itemError }, { status: 500 })
     }
+
+    await createLog(supabase, {
+      itemId: itemData.id,
+      userId: user.id,
+      action: 'criou o card',
+    })
 
     // Handle image upload if provided
     try {

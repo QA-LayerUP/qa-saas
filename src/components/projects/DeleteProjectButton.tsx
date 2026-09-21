@@ -78,7 +78,7 @@ export function DeleteProjectButton({ projectId, className }: DeleteProjectButto
                     </AlertDialogCancel>
                     <AlertDialogAction 
                         onClick={handleDelete} 
-                        className="bg-red-500 font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-red-600"
+                        className="bg-red-500 font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-foreground hover:bg-red-600"
                         disabled={loading}
                     >
                         {loading ? (

@@ -3,14 +3,14 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Send, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { addCommentAction } from '@/app/actions/add-comment'
 
 interface Comment {
     id: string
@@ -33,7 +33,6 @@ interface CommentSectionProps {
 export function CommentSection({ itemId, comments, currentUserId, onCommentAdded }: CommentSectionProps) {
     const [newComment, setNewComment] = useState('')
     const [submitting, setSubmitting] = useState(false)
-    const supabase = createClient()
     const router = useRouter()
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -42,23 +41,12 @@ export function CommentSection({ itemId, comments, currentUserId, onCommentAdded
 
         setSubmitting(true)
         try {
-            const { error } = await supabase
-                .from('qa_comments')
-                .insert([
-                    {
-                        qa_item_id: itemId,
-                        user_id: currentUserId,
-                        content: newComment,
-                    }
-                ])
-
-            if (error) throw error
+            const result = await addCommentAction(itemId, newComment)
+            if (result.error) throw new Error(result.error)
 
             setNewComment('')
-            // router.refresh() // Removido para evitar reload total
-            if (onCommentAdded) {
-                onCommentAdded()
-            }
+            onCommentAdded?.()
+            router.refresh()
         } catch (error: any) {
             console.error('Error posting comment:', error)
             alert(`Error posting comment: ${error.message || 'Unknown error'}`)

@@ -4,28 +4,26 @@ import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CreateQAItemModal } from './CreateQAItemModal'
-import { QACategory, Team } from '@/lib/types'
+import { Team } from '@/lib/types'
 
 interface NewQAItemButtonProps {
-    categories: QACategory[]
     teams: Team[]
     projectId: string
 }
 
-export function NewQAItemButton({ categories, teams, projectId }: NewQAItemButtonProps) {
+export function NewQAItemButton({ teams, projectId }: NewQAItemButtonProps) {
     const [open, setOpen] = useState(false)
 
     return (
         <>
-            <Button 
+            <Button
                 onClick={() => setOpen(true)}
-                className="bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6]"
+                className="bg-transparent border border-roxo font-montserrat text-[10px] font-semibold uppercase tracking-[0.14em] text-roxo hover:bg-rosa hover:text-white hover:border-rosa"
             >
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="h-4 w-4" />
                 Novo Item
             </Button>
             <CreateQAItemModal
-                categories={categories}
                 teams={teams}
                 projectId={projectId}
                 open={open}

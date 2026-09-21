@@ -20,7 +20,7 @@ const steps = [
             <div className="space-y-4">
                                 <div className="flex flex-col gap-2">
                                     <p className="text-sm text-foreground">1. Clique no botão abaixo para baixar a versão mais recente.</p>
-                                    <Button className="w-fit gap-2 bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6]" asChild>
+                                    <Button className="w-fit gap-2" asChild>
                                         <Link href="/extension/qahub-extension.zip" target="_blank" prefetch={false}>
                                             <Download className="h-4 w-4" />
                                             Baixar Extensão (.zip)
@@ -31,7 +31,7 @@ const steps = [
                                     <p className="text-sm text-foreground">
                                         2. Localize o arquivo baixado, clique com o botão direito e selecione <strong>&quot;Extrair Tudo&quot;</strong> (ou Unzip).
                                     </p>
-                                    <div className="flex items-center gap-2 rounded-lg border border-orange-200 bg-orange-50 p-2.5 text-xs text-orange-700">
+                                    <div className="flex items-center gap-2 rounded-lg border border-amarelo/30 bg-amarelo/10 p-2.5 text-xs text-amarelo">
                                         <AlertTriangle className="h-3.5 w-3.5" />
                                         <span><strong>Importante:</strong> Não exclua a pasta extraída após a instalação.</span>
                                     </div>
@@ -90,7 +90,7 @@ const steps = [
                 <p className="text-sm text-foreground">
                     Clique no ícone de &quot;Quebra-cabeça&quot; na barra do Chrome e clique no &quot;Alfinete&quot; ao lado do <strong>QAHub</strong> para fixá-lo.
                 </p>
-                <div className="mt-4 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-sm font-medium text-green-800">
+                <div className="mt-4 flex items-center gap-3 border border-border bg-foreground/5 p-4 text-sm font-medium text-foreground">
                     <CheckCircle2 className="h-6 w-6 shrink-0" />
                     <span><strong>Pronto!</strong> Agora acesse qualquer site do seu projeto e abra a extensão.</span>
                 </div>
@@ -169,24 +169,20 @@ export default function TutorialPage() {
     }
 
     return (
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 pb-20">
-            {/* Header */}
-            <div className="space-y-6 text-center">
-                <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-[#7900E5]/30 bg-[#7900E5]/10 px-4 py-2">
-                    <div className="h-2 w-2 animate-pulse rounded-full bg-[#7900E5]" />
-                    <span className="font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-[#7900E5]">
-                        Tutorial de Instalação
-                    </span>
-                </div>
-                <h1 className="font-montserrat text-4xl font-bold tracking-tight">Extensão QA LayerUP</h1>
-                <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-                    Siga este guia rápido para instalar nossa ferramenta de captura de bugs no seu Google Chrome e turbinar seu fluxo de QA.
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 pb-20">
+            <div className="space-y-4 text-center">
+                <p className="text-[11px] font-semibold tracking-[0.22em] text-rosa uppercase dark:text-amarelo">
+                    Tutorial de instalação
                 </p>
-                <div className="flex justify-center gap-4">
-                    <Button size="lg" className="gap-2 bg-[#7900E5] font-montserrat text-sm font-semibold uppercase tracking-[0.14em] text-white shadow-lg hover:bg-[#ff28c6]" asChild>
+                <h1 className="font-mona text-5xl lg:text-6xl">Extensão QA Hub</h1>
+                <p className="mx-auto max-w-2xl text-sm text-foreground/65">
+                    Siga este guia para instalar a captura de bugs no Chrome e acelerar o fluxo de QA.
+                </p>
+                <div className="flex justify-center">
+                    <Button size="lg" asChild>
                         <Link href="/extension/qahub-extension.zip" target="_blank" prefetch={false}>
                             <Download className="h-5 w-5" />
-                            Baixar Extensão Agora
+                            Baixar extensão
                         </Link>
                     </Button>
                 </div>
@@ -198,10 +194,10 @@ export default function TutorialPage() {
                     const imageSrc = `/print-0${index + 1}.png`
                     
                     return (
-                        <Card key={index} className="overflow-hidden rounded-xl border-l-4 border-l-[#7900E5] shadow-sm transition-all hover:shadow-lg hover:shadow-[#7900E5]/10">
+                        <Card key={index} className="overflow-hidden border-l-4 border-l-roxo">
                             <CardHeader className="border-b bg-linear-to-r from-muted/30 to-transparent pb-4">
                                 <div className="flex items-center gap-4">
-                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#7900E5] to-[#7900E5] font-montserrat text-lg font-bold text-white shadow-lg">
+                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-roxo font-mona text-2xl text-white">
                                         {index + 1}
                                     </div>
                                     <div className="space-y-1">
@@ -223,7 +219,7 @@ export default function TutorialPage() {
 
                                 {/* Lado Direito: Imagem com Click para Zoom */}
                                 <div 
-                                    className="group relative aspect-video w-full cursor-zoom-in overflow-hidden rounded-xl border border-border bg-muted shadow-sm transition-all hover:border-[#7900E5]/30 hover:shadow-lg hover:shadow-[#7900E5]/10"
+                                    className="group relative aspect-video w-full cursor-zoom-in overflow-hidden border border-border bg-foreground/5"
                                     onClick={() => handleImageClick(imageSrc, index)}
                                 >
                                     <Image 
@@ -235,8 +231,8 @@ export default function TutorialPage() {
                                     />
                                     
                                     {/* Overlay de Zoom no Hover */}
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                                        <div className="rounded-full bg-[#7900E5]/20 p-3 text-white backdrop-blur-sm">
+                                    <div className="absolute inset-0 flex items-center justify-center bg-foreground/5 opacity-0 transition-opacity group-hover:opacity-100">
+                                        <div className="rounded-full bg-[#7900E5]/20 p-3 text-foreground backdrop-blur-sm">
                                             <Maximize2 className="h-6 w-6" />
                                         </div>
                                     </div>
@@ -249,11 +245,11 @@ export default function TutorialPage() {
             </div>
 
             {/* Footer / Ajuda */}
-            <Alert className="rounded-xl border-blue-200 bg-blue-50">
-                <AlertTitle className="flex items-center gap-2 font-montserrat font-semibold text-blue-800">
+            <Alert className="border-border bg-foreground/5">
+                <AlertTitle className="flex items-center gap-2 font-semibold">
                     Precisa de ajuda?
                 </AlertTitle>
-                <AlertDescription className="mt-2 text-sm text-blue-700">
+                <AlertDescription className="mt-2 text-sm text-foreground/60">
                     Se tiver dificuldades ou receber erros de &quot;Manifest file missing&quot;, verifique se você extraiu a pasta corretamente (não selecione o arquivo .zip direto). Entre em contato com time de Dev :D - By Ale Dev
                 </AlertDescription>
             </Alert>
@@ -276,7 +272,7 @@ export default function TutorialPage() {
                                     <Badge variant="secondary" className="bg-[#7900E5]/20 text-[#7900E5] border-[#7900E5]/30 font-montserrat font-semibold">
                                         Passo {selectedImageIndex + 1} de {steps.length}
                                     </Badge>
-                                    <span className="font-montserrat text-sm font-semibold text-white">
+                                    <span className="font-montserrat text-sm font-semibold text-foreground">
                                         {steps[selectedImageIndex].title}
                                     </span>
                                 </>
@@ -285,24 +281,24 @@ export default function TutorialPage() {
 
                         <div className="flex items-center gap-2">
                             {/* Controles de Zoom e Rotação */}
-                            <div className="flex items-center gap-1 rounded-lg bg-white/10 p-1 backdrop-blur-sm">
+                            <div className="flex items-center gap-1 rounded-lg bg-foreground/10 p-1 backdrop-blur-sm">
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 text-white hover:bg-white/20"
+                                    className="h-8 w-8 text-foreground hover:bg-white/20"
                                     onClick={() => setZoom(prev => Math.max(prev - 0.25, 0.5))}
                                     disabled={zoom <= 0.5}
                                     title="Diminuir zoom (ou -)"
                                 >
                                     <ZoomOut className="h-4 w-4" />
                                 </Button>
-                                <span className="min-w-12 text-center text-xs font-medium text-white">
+                                <span className="min-w-12 text-center text-xs font-medium text-foreground">
                                     {Math.round(zoom * 100)}%
                                 </span>
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 text-white hover:bg-white/20"
+                                    className="h-8 w-8 text-foreground hover:bg-white/20"
                                     onClick={() => setZoom(prev => Math.min(prev + 0.25, 3))}
                                     disabled={zoom >= 3}
                                     title="Aumentar zoom (ou +)"
@@ -312,7 +308,7 @@ export default function TutorialPage() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 text-white hover:bg-white/20"
+                                    className="h-8 w-8 text-foreground hover:bg-white/20"
                                     onClick={() => setRotation(prev => (prev + 90) % 360)}
                                     title="Rotacionar"
                                 >
@@ -323,7 +319,7 @@ export default function TutorialPage() {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-9 w-9 rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+                                className="h-9 w-9 rounded-full bg-foreground/10 text-foreground backdrop-blur-sm transition-colors hover:bg-white/20"
                                 onClick={() => {
                                     setSelectedImage(null)
                                     setSelectedImageIndex(null)
@@ -344,7 +340,7 @@ export default function TutorialPage() {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="absolute left-4 z-50 h-12 w-12 rounded-full bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:scale-110"
+                                className="absolute left-4 z-50 h-12 w-12 rounded-full bg-foreground/10 text-foreground backdrop-blur-sm transition-all hover:bg-white/20 hover:scale-110"
                                 onClick={goToPrevious}
                                 title="Anterior (←)"
                             >
@@ -377,7 +373,7 @@ export default function TutorialPage() {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="absolute right-4 z-50 h-12 w-12 rounded-full bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:scale-110"
+                                className="absolute right-4 z-50 h-12 w-12 rounded-full bg-foreground/10 text-foreground backdrop-blur-sm transition-all hover:bg-white/20 hover:scale-110"
                                 onClick={goToNext}
                                 title="Próximo (→)"
                             >
@@ -388,19 +384,19 @@ export default function TutorialPage() {
 
                     {/* Footer com dicas */}
                     <div className="absolute bottom-0 left-0 right-0 z-50 bg-linear-to-t from-black/80 via-black/60 to-transparent p-4 backdrop-blur-sm">
-                        <div className="flex items-center justify-center gap-6 text-xs text-white/70">
+                        <div className="flex items-center justify-center gap-6 text-xs text-foreground/70">
                             <span className="flex items-center gap-1.5">
-                                <kbd className="rounded bg-white/10 px-1.5 py-0.5 font-mono">ESC</kbd>
+                                <kbd className="rounded bg-foreground/10 px-1.5 py-0.5 font-mono">ESC</kbd>
                                 Fechar
                             </span>
                             <span className="flex items-center gap-1.5">
-                                <kbd className="rounded bg-white/10 px-1.5 py-0.5 font-mono">←</kbd>
-                                <kbd className="rounded bg-white/10 px-1.5 py-0.5 font-mono">→</kbd>
+                                <kbd className="rounded bg-foreground/10 px-1.5 py-0.5 font-mono">←</kbd>
+                                <kbd className="rounded bg-foreground/10 px-1.5 py-0.5 font-mono">→</kbd>
                                 Navegar
                             </span>
                             <span className="flex items-center gap-1.5">
-                                <kbd className="rounded bg-white/10 px-1.5 py-0.5 font-mono">+</kbd>
-                                <kbd className="rounded bg-white/10 px-1.5 py-0.5 font-mono">-</kbd>
+                                <kbd className="rounded bg-foreground/10 px-1.5 py-0.5 font-mono">+</kbd>
+                                <kbd className="rounded bg-foreground/10 px-1.5 py-0.5 font-mono">-</kbd>
                                 Zoom
                             </span>
                         </div>

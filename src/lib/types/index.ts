@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export type ProjectStatus = 'em_qa' | 'corrigindo' | 'homologando' | 'finalizado';
+import type { QAItemStatus } from '@/lib/qa-status'
+export type { ProjectStatus } from '@/lib/project-status'
+export type { QAItemStatus }
 export type UserRole = 'ux' | 'dev' | 'content' | 'qa' | 'admin';
 export type QAItemPriority = 'alta' | 'media' | 'baixa';
-export type QAItemStatus = 'aberto' | 'em_correcao' | 'em_homologacao' | 'finalizado';
 
 export interface Project {
     id: string;
@@ -10,6 +11,7 @@ export interface Project {
     client: string | null;
     status: ProjectStatus;
     site_url: string | null;
+    figma_url: string | null;
     created_at: string;
 }
 

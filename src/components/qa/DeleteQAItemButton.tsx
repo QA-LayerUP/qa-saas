@@ -104,7 +104,7 @@ export function DeleteQAItemButton({ itemId }: DeleteQAItemButtonProps) {
                     <AlertDialogAction 
                         onClick={handleDelete} 
                         disabled={loading}
-                        className="bg-red-600 font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-red-700 focus:ring-red-600"
+                        className="bg-red-600 font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-foreground hover:bg-red-700 focus:ring-red-600"
                     >
                         {loading ? (
                             <>

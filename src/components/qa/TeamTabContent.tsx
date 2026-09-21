@@ -7,20 +7,19 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { createLog } from '@/lib/services/logs'
+import { QA_CATEGORY_LABELS } from '@/lib/qa-categories'
 import { QAItem, QACategory, QAItemStatus } from '@/lib/types/index'
+import { QA_ITEM_STATUSES, QA_ITEM_STATUS_LABELS } from '@/lib/qa-status'
 import { QAItemCard } from './QAItemCard'
 import {
     LayoutGrid,
     List,
-    AlertCircle,
-    Clock,
-    CheckCircle2,
+    Filter,
+    Kanban,
     Globe,
     Image as ImageIcon,
-    X,
-    Filter,
-    Kanban
 } from 'lucide-react'
+import { StatusIcon } from './StatusIcon'
 import { KanbanBoard } from './KanbanBoard'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -59,6 +58,16 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
 
     // --- Filtros ---
+    const titleById = useMemo(() => {
+        const map = new Map<string, string>()
+        for (const category of categories || []) {
+            map.set(category.id, category.title)
+        }
+        return map
+    }, [categories])
+
+    const getItemCategoryTitle = (item: QAItem) => titleById.get(item.category_id) || 'Outros'
+
     const categoriesForTeam = useMemo(() => {
         return (categories || []).filter((c) => (c.team_id || 'unassigned') === teamId)
     }, [categories, teamId])
@@ -71,25 +80,44 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
         })
     }, [localItems, teamId, categoriesForTeam])
 
+    const categoryFilters = useMemo(() => {
+        const counts = new Map<string, number>()
+        for (const item of itemsForTeam) {
+            const title = getItemCategoryTitle(item)
+            counts.set(title, (counts.get(title) || 0) + 1)
+        }
+
+        const extras = [...counts.keys()].filter(
+            (title) => !(QA_CATEGORY_LABELS as readonly string[]).includes(title)
+        )
+
+        const labels = [...QA_CATEGORY_LABELS, ...extras].filter(
+            (title) => (counts.get(title) || 0) > 0
+        )
+
+        return {
+            labels,
+            counts,
+        }
+    }, [itemsForTeam, titleById])
+
+    useEffect(() => {
+        if (selectedCategory !== 'all' && !categoryFilters.labels.includes(selectedCategory)) {
+            setSelectedCategory('all')
+        }
+    }, [selectedCategory, categoryFilters.labels])
+
     // Lógica de Filtragem Atualizada (Categoria AND Status)
     const filteredItems = useMemo(() => {
         return itemsForTeam.filter((i) => {
-            const matchCategory = selectedCategory === 'all' || i.category_id === selectedCategory
+            const matchCategory = selectedCategory === 'all' || getItemCategoryTitle(i) === selectedCategory
             const matchStatus = selectedStatus === 'all' || i.status === selectedStatus
             return matchCategory && matchStatus
         })
-    }, [itemsForTeam, selectedCategory, selectedStatus])
+    }, [itemsForTeam, selectedCategory, selectedStatus, titleById])
 
     // --- Helpers ---
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'aberto': return <AlertCircle className="h-4 w-4 text-red-500" />
-            case 'em_correcao': return <Clock className="h-4 w-4 text-yellow-500" />
-            case 'em_homologacao': return <Clock className="h-4 w-4 text-blue-500" />
-            case 'finalizado': return <CheckCircle2 className="h-4 w-4 text-green-500" />
-            default: return <AlertCircle className="h-4 w-4" />
-        }
-    }
+    const getStatusIcon = (status: string) => <StatusIcon status={status} />
 
     const getPriorityColor = (priority: string) => {
         switch (priority) {
@@ -172,21 +200,21 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
                     >
                         Todos
                     </button>
-                    {categoriesForTeam.map((cat) => (
+                    {categoryFilters.labels.map((label) => (
                         <button
-                            key={cat.id}
-                            onClick={() => setSelectedCategory(cat.id)}
-                            className={`flex items-center gap-2 whitespace-nowrap rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${selectedCategory === cat.id
+                            key={label}
+                            onClick={() => setSelectedCategory(label)}
+                            className={`flex items-center gap-2 whitespace-nowrap rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${selectedCategory === label
                                 ? 'border-[#7900E5] bg-[#7900E5] text-white'
                                 : 'border-border bg-card hover:border-[#7900E5]/30 hover:bg-[#7900E5]/5'
                                 }`}
                         >
-                            {cat.title}
-                            <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] ${selectedCategory === cat.id
+                            {label}
+                            <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] ${selectedCategory === label
                                 ? 'bg-background/20 dark:bg-background/30'
                                 : 'bg-muted-foreground/10 text-muted-foreground'
                                 }`}>
-                                {(itemsForTeam.filter(i => i.category_id === cat.id) || []).length}
+                                {categoryFilters.counts.get(label) || 0}
                             </span>
                         </button>
                     ))}
@@ -205,10 +233,11 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">Todos os Status</SelectItem>
-                            <SelectItem value="aberto">Aberto</SelectItem>
-                            <SelectItem value="em_correcao">Em Correção</SelectItem>
-                            <SelectItem value="em_homologacao">Homologação</SelectItem>
-                            <SelectItem value="finalizado">Finalizado</SelectItem>
+                            {QA_ITEM_STATUSES.map((status) => (
+                                <SelectItem key={status} value={status}>
+                                    {QA_ITEM_STATUS_LABELS[status]}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
 
@@ -324,7 +353,7 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
                                                         <div className="flex items-center gap-2 mt-1.5">
                                                             {getStatusIcon(item.status)}
                                                             <span className="text-xs font-medium uppercase text-muted-foreground whitespace-nowrap">
-                                                                {item.status.replace('_', ' ')}
+                                                                {QA_ITEM_STATUS_LABELS[item.status as QAItemStatus] ?? item.status.replace('_', ' ')}
                                                             </span>
                                                         </div>
                                                     </td>
@@ -454,7 +483,7 @@ export default function TeamTabContent({ teamId, categories, items, projectId }:
 
             {/* --- MODAL LIGHTBOX --- */}
             <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
-                <DialogContent className="max-w-none w-screen h-screen p-0 border-none bg-black/95 flex flex-col items-center justify-center focus:outline-none z-100 rounded-none [&>button[data-slot='dialog-close']]:text-white [&>button[data-slot='dialog-close']]:bg-white/10 [&>button[data-slot='dialog-close']]:hover:bg-white/20 [&>button[data-slot='dialog-close']]:border-white/20 [&>button[data-slot='dialog-close']]:rounded-full [&>button[data-slot='dialog-close']]:opacity-100">
+                <DialogContent className="max-w-none w-screen h-screen p-0 border-none bg-black/95 flex flex-col items-center justify-center focus:outline-none z-100 rounded-none [&>button[data-slot='dialog-close']]:text-foreground [&>button[data-slot='dialog-close']]:bg-foreground/10 [&>button[data-slot='dialog-close']]:hover:bg-white/20 [&>button[data-slot='dialog-close']]:border-white/20 [&>button[data-slot='dialog-close']]:rounded-full [&>button[data-slot='dialog-close']]:opacity-100">
                     <DialogTitle className="sr-only">Visualização da Evidência</DialogTitle>
 
                     <div className="relative w-full h-full flex items-center justify-center">

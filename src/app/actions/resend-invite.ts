@@ -1,9 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { sendEmail } from '@/lib/email'
 
 export async function resendInviteAction(email: string) {
     const supabase = await createClient()
@@ -29,8 +27,7 @@ export async function resendInviteAction(email: string) {
     const formattedRole = invite.role.charAt(0).toUpperCase() + invite.role.slice(1)
 
     try {
-        await resend.emails.send({
-            from: 'QA Hub · Layer Up <onboarding@qa.projetoslayerup.com.br>',
+        await sendEmail({
             to: invite.email,
             subject: 'Estamos sentindo sua falta no QA Hub! 🥺',
             html: `
@@ -115,7 +112,7 @@ export async function resendInviteAction(email: string) {
         })
         return { success: true }
     } catch (emailError) {
-        console.error('Erro Resend:', emailError)
+        console.error('Erro SMTP:', emailError)
         return { error: 'Erro ao reenviar e-mail.' }
     }
 }

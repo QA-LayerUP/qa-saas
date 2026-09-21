@@ -10,7 +10,8 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { AlertCircle, Clock, CheckCircle2, Globe, ExternalLink, Image as ImageIcon } from 'lucide-react'
+import { Globe, ExternalLink, Image as ImageIcon } from 'lucide-react'
+import { StatusIcon } from './StatusIcon'
 import { DeleteQAItemButton } from './DeleteQAItemButton'
 import { Button } from '@/components/ui/button'
 
@@ -43,21 +44,13 @@ export function QAItemCard({
         }
     }
 
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'aberto': return <AlertCircle className="h-4 w-4 text-red-500" />
-            case 'em_correcao': return <Clock className="h-4 w-4 text-yellow-500" />
-            case 'em_homologacao': return <Clock className="h-4 w-4 text-blue-500" />
-            case 'finalizado': return <CheckCircle2 className="h-4 w-4 text-green-500" />
-            default: return <AlertCircle className="h-4 w-4" />
-        }
-    }
+    const getStatusIcon = (status: string) => <StatusIcon status={status} />
 
     const getPriorityColor = (priority: string) => {
         switch (priority) {
-            case 'alta': return 'bg-[#7900E5]/10 text-[#7900E5] hover:bg-[#7900E5]/10 border-[#7900E5]/30 font-semibold'
-            case 'media': return 'bg-[#ffcc00]/10 text-[#ffcc00] hover:bg-[#ffcc00]/10 border-[#ffcc00]/30 font-semibold'
-            case 'baixa': return 'bg-[#7900E5]/10 text-[#7900E5] hover:bg-[#7900E5]/10 border-[#7900E5]/30 font-semibold'
+            case 'alta': return 'bg-roxo/10 text-roxo dark:text-[#c9a0ff] hover:bg-roxo/10 border-roxo/30 font-semibold'
+            case 'media': return 'bg-amarelo/10 text-amarelo hover:bg-amarelo/10 border-amarelo/30 font-semibold'
+            case 'baixa': return 'bg-foreground/5 text-foreground/70 hover:bg-foreground/5 border-border font-semibold'
             default: return 'bg-gray-100 text-gray-800'
         }
     }
@@ -82,7 +75,7 @@ export function QAItemCard({
     }
 
     return (
-        <Card className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-[#7900E5]/30 hover:bg-card/80 hover:shadow-lg hover:shadow-[#7900E5]/5">
+        <Card className="group relative flex h-full cursor-pointer flex-col overflow-hidden hover:border-roxo/40">
             
             {/* Botão de deletar - Topo Direito */}
             <div className="absolute right-2 top-2 z-20 opacity-0 transition-opacity group-hover:opacity-100">
@@ -151,7 +144,7 @@ export function QAItemCard({
             <CardFooter className="relative z-10 mt-auto flex items-center justify-between border-t bg-muted/5 p-4 py-3 pt-0">
                 <div className="flex items-center gap-2">
                     <Avatar className="h-5 w-5">
-                        <AvatarFallback className="bg-[#7900E5]/10 text-[9px] uppercase text-[#7900E5]">
+                        <AvatarFallback className="bg-roxo/10 text-[9px] uppercase text-roxo dark:text-[#c9a0ff]">
                             {item.assigned_user?.name 
                                 ? item.assigned_user.name.substring(0, 2)
                                 : (item.assigned_to ? 'U' : '?')

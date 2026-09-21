@@ -1,12 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Montserrat } from "next/font/google";
+import { Geist_Mono, Montserrat, Mona_Sans } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
-// 1. Importe o Toaster
-import { Toaster } from '@/components/ui/sonner'
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+const monaSans = Mona_Sans({
+  variable: "--font-mona",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -14,15 +24,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-});
-
 export const metadata: Metadata = {
-  title: "QA LayerUP",
-  description: "A plataforma definitiva para gestão de qualidade e automação de testes.",
+  title: "QA Hub | Layer Up",
+  description: "Gestão de qualidade e QA dos projetos da Layer Up.",
+  icons: {
+    icon: [{ url: "/brand/faviconV2.png", type: "image/png" }],
+    shortcut: "/brand/faviconV2.png",
+    apple: "/brand/faviconV2.png",
+  },
 };
 
 export default function RootLayout({
@@ -31,13 +40,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR" className="dark" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased`}
+        className={`${montserrat.variable} ${monaSans.variable} ${geistMono.variable} min-h-full bg-background font-sans text-foreground antialiased`}
       >
-        {children}
-        {/* 2. ADICIONE AQUI NO FINAL */}
-        <Toaster richColors position="top-right" />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <ThemeProvider>
+          {children}
+          <Toaster richColors position="bottom-right" />
+        </ThemeProvider>
       </body>
     </html>
   );

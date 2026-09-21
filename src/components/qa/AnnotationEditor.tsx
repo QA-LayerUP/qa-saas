@@ -74,13 +74,13 @@ export function AnnotationEditor({ imageBlob, open, onClose, onSave }: Annotatio
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="flex h-[90vh] w-full max-w-6xl flex-col overflow-hidden p-0 [&>button[data-slot='dialog-close']]:text-white [&>button[data-slot='dialog-close']]:bg-white/10 [&>button[data-slot='dialog-close']]:hover:bg-white/20 [&>button[data-slot='dialog-close']]:border-white/20 [&>button[data-slot='dialog-close']]:rounded-full [&>button[data-slot='dialog-close']]:opacity-100">
+            <DialogContent className="flex h-[90vh] w-full max-w-6xl flex-col overflow-hidden p-0 [&>button[data-slot='dialog-close']]:text-foreground [&>button[data-slot='dialog-close']]:bg-foreground/10 [&>button[data-slot='dialog-close']]:hover:bg-white/20 [&>button[data-slot='dialog-close']]:border-white/20 [&>button[data-slot='dialog-close']]:rounded-full [&>button[data-slot='dialog-close']]:opacity-100">
                 <DialogHeader className="shrink-0 border-b px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div>
                         <div className="mb-2 flex items-center gap-2">
                             <div className="h-1 w-6 rounded-full bg-linear-to-r from-[#7900E5] to-[#7900E5]" />
-                            <span className="font-montserrat text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7900E5] dark:text-white">
+                            <span className="font-montserrat text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7900E5] dark:text-foreground">
                                 {'// Screenshot Capturado'}
                             </span>
                         </div>

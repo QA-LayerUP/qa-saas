@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { AlertCircle, Clock, CheckCircle2, Loader2, Maximize2, Hash, Users, Tag, Save, History, Ban, MessageSquare } from 'lucide-react'
+import { Loader2, Maximize2, Hash, Users, Tag, Save, History, MessageSquare } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
@@ -30,7 +30,9 @@ import { EvidenceUpload } from '@/components/qa/EvidenceUpload'
 import { EvidencesDisplay } from '@/components/qa/EvidencesDisplay'
 import { CommentSection } from '@/components/qa/CommentSection'
 import { createLog, getItemLogs } from '@/lib/services/logs'
-import { QALog } from '@/lib/types'
+import { QA_CATEGORY_LABELS, ensureQaCategory } from '@/lib/qa-categories'
+import { QA_ITEM_STATUSES, QA_ITEM_STATUS_LABELS, qaStatusLabel } from '@/lib/qa-status'
+import { StatusIcon } from '@/components/qa/StatusIcon'
 
 interface QAItemDetailSheetProps {
     itemId: string | null
@@ -54,7 +56,7 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
         status: '',
         priority: '',
         team_id: '',
-        category_id: ''
+        category_title: ''
     })
 
     const [evidences, setEvidences] = useState<any[]>([])
@@ -70,7 +72,7 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
             fetchData()
         } else {
             setItem(null)
-            setFormData({ title: '', description: '', status: '', priority: '', team_id: '', category_id: '' })
+            setFormData({ title: '', description: '', status: '', priority: '', team_id: '', category_title: '' })
             setLogs([])
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,7 +105,7 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                 status: itemData.status,
                 priority: itemData.priority,
                 team_id: itemData.team_id || '',
-                category_id: itemData.category_id || ''
+                category_title: itemData.category?.title || ''
             })
 
             // 2. Buscas Paralelas
@@ -165,7 +167,7 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                 status: itemData.status,
                 priority: itemData.priority,
                 team_id: resolvedTeamId,
-                category_id: itemData.category_id || ''
+                category_title: itemData.category?.title || ''
             })
 
             console.log('[TEAM SELECT] Teams loaded:', projectTeamsData)
@@ -217,24 +219,32 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
             ...logs.map(log => ({ ...log, type: 'log', date: new Date(log.created_at) })),
             ...comments.map(comment => ({ ...comment, type: 'comment', date: new Date(comment.created_at) }))
         ]
+        const hasCreateLog = logs.some((log) =>
+            String(log.action || '').toLowerCase().includes('criou o card')
+        )
+        if (item?.created_at && !hasCreateLog) {
+            events.push({
+                id: `created-${item.id}`,
+                type: 'log',
+                action: 'criou o card',
+                created_at: item.created_at,
+                date: new Date(item.created_at),
+                user: item.created_user,
+                details: null,
+            })
+        }
         return events.sort((a, b) => b.date.getTime() - a.date.getTime())
-    }, [logs, comments])
+    }, [logs, comments, item])
 
     const handleChange = (field: string, value: string) => {
-        setFormData(prev => {
-            const newData = { ...prev, [field]: value }
-            if (field === 'team_id' && value !== prev.team_id) {
-                newData.category_id = ''
-            }
-            return newData
-        })
+        setFormData(prev => ({ ...prev, [field]: value }))
     }
 
     const handleSaveChanges = async () => {
         if (!item || !currentUserId) return
 
         // Validação: category_id é obrigatório
-        if (!formData.category_id) {
+        if (!formData.category_title) {
             alert('Por favor, selecione uma categoria antes de salvar.')
             return
         }
@@ -242,13 +252,19 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
         setSaving(true)
 
         try {
+            const categoryId = await ensureQaCategory(supabase, {
+                projectId,
+                teamId: formData.team_id || null,
+                title: formData.category_title,
+            })
+
             const payload = {
                 title: formData.title,
                 description: formData.description,
                 status: formData.status,
                 priority: formData.priority,
                 team_id: formData.team_id || null,
-                category_id: formData.category_id // Não enviar null, sempre tem valor
+                category_id: categoryId
             }
 
             const { error } = await supabase
@@ -306,26 +322,20 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
         }
     }
 
-    const availableCategories = useMemo(() => {
-        if (!formData.team_id) return []
-        return projectCategories.filter(c => c.team_id === formData.team_id)
-    }, [projectCategories, formData.team_id])
-
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'aberto': return <AlertCircle className="h-4 w-4 text-red-500" />
-            case 'em_correcao': return <Clock className="h-4 w-4 text-yellow-500" />
-            case 'em_homologacao': return <Clock className="h-4 w-4 text-blue-500" />
-            case 'finalizado': return <CheckCircle2 className="h-4 w-4 text-green-500" />
-            case 'cancelado': return <Ban className="h-4 w-4 text-gray-400" />
-            default: return <AlertCircle className="h-4 w-4" />
+    const categoryOptions = useMemo(() => {
+        const current = formData.category_title
+        if (current && !(QA_CATEGORY_LABELS as readonly string[]).includes(current)) {
+            return [current, ...QA_CATEGORY_LABELS]
         }
-    }
+        return [...QA_CATEGORY_LABELS]
+    }, [formData.category_title])
+
+    const getStatusIcon = (status: string) => <StatusIcon status={status} />
 
     const formatLogDetails = (log: QALog) => {
         if (!log.details) return null
         if (log.action.includes('status')) {
-            return <span className="text-xs text-muted-foreground block mt-0.5">de <b className="uppercase">{log.details.from?.replace('_', ' ')}</b> para <b className="uppercase">{log.details.to?.replace('_', ' ')}</b></span>
+            return <span className="text-xs text-muted-foreground block mt-0.5">de <b className="uppercase">{qaStatusLabel(log.details.from)}</b> para <b className="uppercase">{qaStatusLabel(log.details.to)}</b></span>
         }
         if (log.action.includes('time') || log.action.includes('prioridade')) {
             return <span className="text-xs text-muted-foreground block mt-0.5">de <b>{log.details.from}</b> para <b>{log.details.to}</b></span>
@@ -379,10 +389,11 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                     </div>
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="aberto">Aberto</SelectItem>
-                                                    <SelectItem value="em_correcao">Em Correção</SelectItem>
-                                                    <SelectItem value="em_homologacao">Homologação</SelectItem>
-                                                    <SelectItem value="finalizado">Finalizado</SelectItem>
+                                                    {QA_ITEM_STATUSES.map((status) => (
+                                                        <SelectItem key={status} value={status}>
+                                                            {QA_ITEM_STATUS_LABELS[status]}
+                                                        </SelectItem>
+                                                    ))}
                                                     <SelectItem value="cancelado">Cancelado</SelectItem>
                                                 </SelectContent>
                                             </Select>
@@ -392,7 +403,7 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                 onValueChange={(val) => handleChange('priority', val)}
                                             >
                                                 <SelectTrigger className={`h-8 w-[110px] border-none text-xs font-bold uppercase shadow-sm
-                                                    ${formData.priority === 'alta' ? 'bg-[#7900E5] text-white hover:bg-[#ff28c6] dark:bg-[#7900E5] dark:text-white' :
+                                                    ${formData.priority === 'alta' ? 'bg-[#7900E5] text-white hover:bg-[#ff28c6]' :
                                                         formData.priority === 'media' ? 'bg-[#ffcc00] text-gray-900 hover:bg-[#ffdb33] dark:bg-[#ffcc00] dark:text-gray-900' :
                                                             'bg-accent text-accent-foreground hover:bg-accent/90'}`
                                                 }>
@@ -514,7 +525,7 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
 
                                                                             <p className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground">
                                                                                 <Clock className="h-3 w-3" />
-                                                                                {format(event.date, "dd MMM 'às' HH:mm", { locale: ptBR })}
+                                                                                {format(event.date, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                                                                             </p>
                                                                         </div>
                                                                     </div>
@@ -569,20 +580,15 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                         <Tag className="h-3 w-3" /> Categoria
                                                     </span>
                                                     <Select
-                                                        value={formData.category_id}
-                                                        onValueChange={(val) => handleChange('category_id', val)}
-                                                        disabled={!formData.team_id || availableCategories.length === 0}
+                                                        value={formData.category_title}
+                                                        onValueChange={(val) => handleChange('category_title', val)}
                                                     >
                                                         <SelectTrigger className="w-full">
-                                                            <SelectValue placeholder={
-                                                                !formData.team_id ? "Selecione um time" :
-                                                                    availableCategories.length === 0 ? "Sem categorias" :
-                                                                        "Selecionar..."
-                                                            } />
+                                                            <SelectValue placeholder="Selecionar..." />
                                                         </SelectTrigger>
                                                         <SelectContent>
-                                                            {availableCategories.map(c => (
-                                                                <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                                                            {categoryOptions.map((label) => (
+                                                                <SelectItem key={label} value={label}>{label}</SelectItem>
                                                             ))}
                                                         </SelectContent>
                                                     </Select>
@@ -598,6 +604,12 @@ export function QAItemDetailSheet({ itemId, open, onOpenChange, projectId }: QAI
                                                         </div>
                                                         <span className="font-medium text-foreground">{(item.created_user as any)?.name || 'Sistema'}</span>
                                                     </div>
+                                                    {item.created_at && (
+                                                        <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                                            <Clock className="h-3 w-3" />
+                                                            {format(new Date(item.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                                                        </p>
+                                                    )}
                                                 </div>
 
                                                 {item.page_url && (

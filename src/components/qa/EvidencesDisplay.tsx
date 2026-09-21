@@ -148,7 +148,7 @@ export function EvidencesDisplay({ evidences, itemId, onDelete }: EvidencesDispl
 
             {/* Preview em tela cheia da evidência */}
             <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
-                <DialogContent className="z-50 flex h-[85vh] max-w-[90vw] flex-col items-center justify-center border-none bg-black/95 p-0 focus:outline-none [&>button[data-slot='dialog-close']]:text-white [&>button[data-slot='dialog-close']]:bg-white/10 [&>button[data-slot='dialog-close']]:hover:bg-white/20 [&>button[data-slot='dialog-close']]:border-white/20 [&>button[data-slot='dialog-close']]:rounded-full [&>button[data-slot='dialog-close']]:opacity-100" showCloseButton>
+                <DialogContent className="z-50 flex h-[85vh] max-w-[90vw] flex-col items-center justify-center border-none bg-black/95 p-0 focus:outline-none [&>button[data-slot='dialog-close']]:text-foreground [&>button[data-slot='dialog-close']]:bg-foreground/10 [&>button[data-slot='dialog-close']]:hover:bg-white/20 [&>button[data-slot='dialog-close']]:border-white/20 [&>button[data-slot='dialog-close']]:rounded-full [&>button[data-slot='dialog-close']]:opacity-100" showCloseButton>
                     <DialogTitle className="sr-only">Visualização da Evidência</DialogTitle>
 
                     <div className="flex h-full w-full items-center justify-center">
@@ -163,7 +163,7 @@ export function EvidencesDisplay({ evidences, itemId, onDelete }: EvidencesDispl
                                     href={previewImage}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="absolute bottom-6 right-6 inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+                                    className="absolute bottom-6 right-6 inline-flex items-center gap-1 rounded-full bg-foreground/10 px-3 py-1.5 text-xs font-medium text-foreground backdrop-blur-sm transition-colors hover:bg-white/20"
                                 >
                                     <ExternalLink className="h-3.5 w-3.5" />
                                     Abrir em nova aba
@@ -188,7 +188,7 @@ export function EvidencesDisplay({ evidences, itemId, onDelete }: EvidencesDispl
                         <AlertDialogAction
                             onClick={handleDelete}
                             disabled={deleting}
-                            className="bg-destructive text-white hover:bg-destructive/90"
+                            className="bg-destructive text-foreground hover:bg-destructive/90"
                         >
                             {deleting ? 'Excluindo...' : 'Sim, excluir'}
                         </AlertDialogAction>

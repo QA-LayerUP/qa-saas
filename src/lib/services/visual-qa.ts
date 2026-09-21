@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
+import { createLog } from '@/lib/services/logs'
 
 /**
  * Upload an annotated screenshot to Supabase Storage
@@ -108,6 +109,12 @@ export async function createVisualQAItem(params: {
     }
 
     console.log('[createVisualQAItem] ✅ QA item criado:', { id: qaItem.id })
+
+    await createLog(supabase, {
+        itemId: qaItem.id,
+        userId: params.userId,
+        action: 'criou o card',
+    })
 
     // Create the evidence record
     console.log('[createVisualQAItem] Criando evidence record com URL:', params.imageUrl)

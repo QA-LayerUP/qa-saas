@@ -14,9 +14,9 @@ export function RecentActivity({ logs }: RecentActivityProps) {
                 <p className="py-8 text-center text-sm text-muted-foreground">Nenhuma atividade recente.</p>
             ) : (
                 logs.map((log) => (
-                    <div key={log.id} className="flex items-start gap-3 rounded-lg border border-border bg-card/50 p-3 transition-colors hover:bg-card/80">
-                        <Avatar className="mt-0.5 h-8 w-8 border-2 border-[#7900E5]/20">
-                            <AvatarFallback className="bg-linear-to-br from-[#7900E5]/10 to-[#7900E5]/10 text-xs font-semibold text-[#7900E5]">
+                    <div key={log.id} className="lu-card flex items-start gap-3 p-3">
+                        <Avatar className="mt-0.5 h-8 w-8 border border-roxo/20">
+                            <AvatarFallback className="bg-roxo/15 text-xs font-semibold text-roxo dark:text-[#c9a0ff]">
                                 {log.user?.name?.[0]?.toUpperCase() || 'S'}
                             </AvatarFallback>
                         </Avatar>
@@ -26,7 +26,7 @@ export function RecentActivity({ logs }: RecentActivityProps) {
                                 {' '}{log.action}{' '}
                                 {log.qa_item && (
                                     <span className="text-muted-foreground">
-                                        na tarefa <span className="font-medium text-[#7900E5]">#{log.qa_item.title}</span>
+                                        na tarefa <span className="font-medium text-roxo dark:text-amarelo">#{log.qa_item.title}</span>
                                     </span>
                                 )}
                             </p>

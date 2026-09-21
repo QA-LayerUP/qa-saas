@@ -2,15 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { translateAuthError, type AuthError } from '@/lib/auth-errors'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { AuthShell } from '@/components/layout/AuthShell'
 import { AlertCircle, Loader2, Lock, ArrowRight } from 'lucide-react'
 
 export default function ResetPasswordPage() {
@@ -60,43 +58,15 @@ export default function ResetPasswordPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background text-foreground">
-            {/* Top bar simples com logo e faixa de cores da Layer Up */}
-            <header className="border-b border-border bg-background/95 dark:bg-[#050509]">
-                <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-                    <Link href="/" className="flex items-center gap-2">
-                        <Image
-                            src="/LOGO-LAYER.png"
-                            alt="Layer Up"
-                            width={140}
-                            height={40}
-                            className="h-8 w-auto object-contain dark:hidden"
-                            priority
-                        />
-                        <Image
-                            src="/LOGO-LAYER-DARK.png"
-                            alt="Layer Up"
-                            width={140}
-                            height={40}
-                            className="hidden h-8 w-auto object-contain dark:block"
-                            priority
-                        />
-                    </Link>
-                    <ThemeToggle />
-                </div>
-                <div className="h-1 w-full bg-linear-to-r from-[#7900E5] via-[#7900E5] to-[#ffcc00]" />
-            </header>
-
-            <main className="mx-auto flex min-h-[calc(100vh-4rem-4px)] max-w-lg items-center justify-center px-4 py-10 md:py-16">
-                <section className="w-full">
-                    <Card className="border border-border bg-card shadow-[0_18px_40px_rgba(15,23,42,0.3)] dark:bg-black/70 backdrop-blur-xl">
+        <AuthShell subtitle="Defina uma nova senha para continuar.">
+                    <Card className="border-border">
                         <CardHeader className="space-y-2 pb-2 text-center">
-                            <p className="font-montserrat text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7900E5] dark:text-white">
-                                {'// Nova Senha'}
+                            <p className="text-[11px] font-semibold tracking-[0.2em] text-rosa uppercase dark:text-amarelo">
+                                Nova senha
                             </p>
-                            <h2 className="font-montserrat text-lg font-semibold">Defina sua nova senha</h2>
-                            <CardDescription className="text-xs leading-relaxed text-muted-foreground">
-                                Digite sua nova senha abaixo para acessar sua conta.
+                            <h2 className="font-mona text-4xl">Atualizar acesso</h2>
+                            <CardDescription className="text-xs leading-relaxed text-foreground/65">
+                                Digite a nova senha para entrar no QA Hub.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-5">
@@ -176,8 +146,6 @@ export default function ResetPasswordPage() {
                             )}
                         </CardContent>
                     </Card>
-                </section>
-            </main>
-        </div>
+        </AuthShell>
     )
 }

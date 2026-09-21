@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Users } from 'lucide-react'
 import { useDraggable } from '@dnd-kit/core'
+import { qaStatusBadge, qaStatusLabel } from '@/lib/qa-status'
 
 interface KanbanCardProps {
     item: QAItem
@@ -24,25 +25,11 @@ export function KanbanCard({ item, category, onClick }: KanbanCardProps) {
 
     const getPriorityColor = (priority: string) => {
         switch (priority) {
-            case 'alta': return 'bg-[#7900E5]/10 text-[#7900E5] border-[#7900E5]/30'
-            case 'media': return 'bg-[#ffcc00]/10 text-[#ffcc00] border-[#ffcc00]/30'
-            case 'baixa': return 'bg-blue-500/10 text-blue-500 border-blue-500/30'
+            case 'alta': return 'bg-roxo/10 text-roxo border-roxo/30'
+            case 'media': return 'bg-amarelo/10 text-amarelo border-amarelo/30'
+            case 'baixa': return 'bg-foreground/5 text-foreground/70 border-border'
             default: return 'bg-gray-100 text-gray-800'
         }
-    }
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'aberto': return 'bg-red-500/10 text-red-500 border-red-500/30'
-            case 'em_correcao': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30'
-            case 'em_homologacao': return 'bg-blue-500/10 text-blue-500 border-blue-500/30'
-            case 'finalizado': return 'bg-green-500/10 text-green-500 border-green-500/30'
-            default: return 'bg-gray-100 text-gray-800'
-        }
-    }
-
-    const getStatusLabel = (status: string) => {
-        return status.replace('_', ' ')
     }
 
     return (
@@ -52,7 +39,7 @@ export function KanbanCard({ item, category, onClick }: KanbanCardProps) {
             {...listeners}
             {...attributes}
             onClick={onClick}
-            className={`group cursor-pointer rounded-lg border border-border bg-card p-3 shadow-sm transition-all hover:border-[#7900E5]/50 hover:shadow-md ${isDragging ? 'shadow-xl ring-2 ring-[#7900E5]/50' : ''}`}
+            className={`group lu-card cursor-pointer p-3 transition-colors hover:border-roxo/40 ${isDragging ? 'ring-2 ring-roxo/50' : ''}`}
         >
             {/* Category & Status & Priority Row */}
             <div className="mb-2 flex flex-wrap items-center gap-1.5">
@@ -62,8 +49,8 @@ export function KanbanCard({ item, category, onClick }: KanbanCardProps) {
                     </Badge>
                 )}
 
-                <Badge variant="outline" className={`text-[9px] h-4 px-1 uppercase ${getStatusColor(item.status)}`}>
-                    {getStatusLabel(item.status)}
+                <Badge variant="outline" className={`text-[9px] h-4 px-1 uppercase ${qaStatusBadge(item.status)}`}>
+                    {qaStatusLabel(item.status)}
                 </Badge>
 
                 <Badge variant="outline" className={`text-[9px] h-4 px-1 uppercase ${getPriorityColor(item.priority)} ml-auto`}>
@@ -72,7 +59,7 @@ export function KanbanCard({ item, category, onClick }: KanbanCardProps) {
             </div>
 
             {/* Title */}
-            <h4 className="mb-1 text-xs font-semibold text-foreground line-clamp-2 group-hover:text-[#7900E5] transition-colors">
+            <h4 className="mb-1 text-xs font-semibold text-foreground line-clamp-2 group-hover:text-roxo transition-colors dark:group-hover:text-amarelo">
                 {item.title}
             </h4>
 

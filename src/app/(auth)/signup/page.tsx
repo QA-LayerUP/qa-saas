@@ -4,14 +4,13 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { translateAuthError } from '@/lib/auth-errors'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { AuthShell } from '@/components/layout/AuthShell'
 import { AlertCircle, Loader2, Mail, ArrowRight, User, Lock } from 'lucide-react'
 
 // Separamos o formulário em um componente para usar o useSearchParams dentro do Suspense
@@ -69,13 +68,13 @@ function SignUpForm() {
   }
 
   return (
-    <Card className="border border-border bg-card shadow-[0_18px_40px_rgba(15,23,42,0.3)] dark:bg-black/70 backdrop-blur-xl">
+    <Card className="border-border">
       <CardHeader className="space-y-2 pb-2 text-center">
-        <p className="font-montserrat text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7900E5] dark:text-white">
-          {isInvite ? '// Convite Aceito' : '// Cadastro interno'}
+        <p className="text-[11px] font-semibold tracking-[0.2em] text-rosa uppercase dark:text-amarelo">
+          {isInvite ? "Convite" : "Cadastro"}
         </p>
-        <h2 className="font-montserrat text-lg font-semibold">Criar acesso · QA Hub</h2>
-        <CardDescription className="text-xs leading-relaxed text-muted-foreground">
+        <h2 className="font-mona text-4xl">Criar acesso</h2>
+        <CardDescription className="text-xs leading-relaxed text-foreground/65">
           {isInvite 
             ? 'Complete seu cadastro para acessar os projetos.'
             : 'Use seu e-mail corporativo da Layer Up para criar seu usuário.'
@@ -173,11 +172,11 @@ function SignUpForm() {
         </form>
 
         <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-white/10" />
+          <div className="h-px flex-1 bg-foreground/10" />
           <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
             já possui acesso?
           </span>
-          <div className="h-px flex-1 bg-white/10" />
+          <div className="h-px flex-1 bg-foreground/10" />
         </div>
 
         <Link href="/login" className="block">
@@ -198,45 +197,14 @@ function SignUpForm() {
 // Componente Principal
 export default function SignUpPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Top bar simples */}
-      <header className="border-b border-border bg-background/95 dark:bg-[#050509]">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/LOGO-LAYER.png"
-              alt="Layer Up"
-              width={140}
-              height={40}
-              className="h-8 w-auto object-contain dark:hidden"
-              priority
-            />
-            <Image
-              src="/LOGO-LAYER-DARK.png"
-              alt="Layer Up"
-              width={140}
-              height={40}
-              className="hidden h-8 w-auto object-contain dark:block"
-              priority
-            />
-          </Link>
-          <ThemeToggle />
+    <AuthShell subtitle="Cadastro restrito a e-mails @layerup.com.br.">
+      <Suspense fallback={
+        <div className="lu-card flex h-[400px] w-full items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-roxo" />
         </div>
-        <div className="h-1 w-full bg-linear-to-r from-[#7900E5] via-[#7900E5] to-[#ffcc00]" />
-      </header>
-
-      <main className="mx-auto flex min-h-[calc(100vh-4rem-4px)] max-w-lg items-center justify-center px-4 py-10 md:py-16">
-        <section className="w-full">
-          {/* Suspense é necessário para usar useSearchParams no Next.js App Router */}
-          <Suspense fallback={
-            <div className="flex h-[400px] w-full items-center justify-center rounded-xl border bg-card">
-              <Loader2 className="h-8 w-8 animate-spin text-[#7900E5]" />
-            </div>
-          }>
-            <SignUpForm />
-          </Suspense>
-        </section>
-      </main>
-    </div>
+      }>
+        <SignUpForm />
+      </Suspense>
+    </AuthShell>
   )
 }

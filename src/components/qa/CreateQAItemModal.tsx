@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useMemo } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -18,12 +18,13 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Loader2, Upload, X } from 'lucide-react'
-import { QACategory, Team } from '@/lib/types' // Certifique-se de ter o tipo Team exportado
+import { Team } from '@/lib/types'
+import { QA_CATEGORY_LABELS, ensureQaCategory } from '@/lib/qa-categories'
 import { uploadScreenshot } from '@/lib/services/visual-qa'
+import { createLog } from '@/lib/services/logs'
 
 interface CreateQAItemModalProps {
-    teams: Team[] // Adicionado: Recebemos a lista de times
-    categories: QACategory[]
+    teams: Team[]
     projectId: string
     open?: boolean
     onOpenChange?: (open: boolean) => void
@@ -32,7 +33,6 @@ interface CreateQAItemModalProps {
 
 export function CreateQAItemModal({
     teams,
-    categories,
     projectId,
     open: controlledOpen,
     onOpenChange: controlledOnOpenChange,
@@ -50,7 +50,7 @@ export function CreateQAItemModal({
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
     const [selectedTeamId, setSelectedTeamId] = useState<string>('') // Novo controle de Time
-    const [categoryId, setCategoryId] = useState('')
+    const [categoryTitle, setCategoryTitle] = useState('')
     const [priority, setPriority] = useState('media')
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     
@@ -58,15 +58,8 @@ export function CreateQAItemModal({
     const router = useRouter()
     const supabase = createClient()
 
-    // Filtra as categorias com base no time selecionado
-    const filteredCategories = useMemo(() => {
-        if (!selectedTeamId) return []
-        return categories.filter(cat => cat.team_id === selectedTeamId)
-    }, [categories, selectedTeamId])
-
     const handleTeamChange = (value: string) => {
         setSelectedTeamId(value)
-        setCategoryId('') // Reseta a categoria se mudar o time
     }
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,11 +70,17 @@ export function CreateQAItemModal({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!categoryId || !selectedTeamId) return
+        if (!categoryTitle || !selectedTeamId) return
         setLoading(true)
 
         try {
             const { data: { user } } = await supabase.auth.getUser()
+
+            const categoryId = await ensureQaCategory(supabase, {
+                projectId,
+                teamId: selectedTeamId,
+                title: categoryTitle,
+            })
 
             // 1. Create Item
             const { data: itemData, error: itemError } = await supabase
@@ -102,6 +101,14 @@ export function CreateQAItemModal({
 
             if (itemError) throw itemError
 
+            if (itemData && user?.id) {
+                await createLog(supabase, {
+                    itemId: itemData.id,
+                    userId: user.id,
+                    action: 'criou o card',
+                })
+            }
+
             // 2. Upload Image if exists
             if (selectedFile && itemData) {
                 const imageUrl = await uploadScreenshot(selectedFile, projectId)
@@ -118,7 +125,7 @@ export function CreateQAItemModal({
             setTitle('')
             setDescription('')
             setPriority('media')
-            setCategoryId('')
+            setCategoryTitle('')
             // Não resetamos o time aqui propositalmente para facilitar criações seguidas, 
             // mas você pode resetar setSelectedTeamId('') se preferir.
             setSelectedFile(null)
@@ -147,7 +154,7 @@ export function CreateQAItemModal({
                     <DialogHeader>
                         <DialogTitle className="font-montserrat text-xl font-bold">Novo Item de QA</DialogTitle>
                         <DialogDescription>
-                            Selecione o time, a categoria e descreva o problema.
+                            Selecione o time, o tipo de QA e descreva o problema.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -171,30 +178,25 @@ export function CreateQAItemModal({
                             </Select>
                         </div>
 
-                        {/* 2. Categoria (Filtrada pelo Time) */}
+                        {/* 2. Categoria fixa */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="category" className="text-right">
                                 Categoria
                             </Label>
-                            <Select 
-                                value={categoryId} 
-                                onValueChange={setCategoryId} 
-                                disabled={!selectedTeamId} // Desabilita se não tiver time
+                            <Select
+                                value={categoryTitle}
+                                onValueChange={setCategoryTitle}
                                 required
                             >
                                 <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder={!selectedTeamId ? "Selecione um time primeiro" : "Selecione uma categoria"} />
+                                    <SelectValue placeholder="Selecione uma categoria" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {filteredCategories.length === 0 ? (
-                                        <SelectItem value="none" disabled>Nenhuma categoria neste time</SelectItem>
-                                    ) : (
-                                        filteredCategories.map((cat) => (
-                                            <SelectItem key={cat.id} value={cat.id}>
-                                                {cat.title}
-                                            </SelectItem>
-                                        ))
-                                    )}
+                                    {QA_CATEGORY_LABELS.map((label) => (
+                                        <SelectItem key={label} value={label}>
+                                            {label}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -289,7 +291,7 @@ export function CreateQAItemModal({
                     <DialogFooter>
                         <Button 
                             type="submit" 
-                            disabled={loading || !categoryId || !selectedTeamId}
+                            disabled={loading || !categoryTitle || !selectedTeamId}
                             className="bg-[#7900E5] font-montserrat text-xs font-semibold uppercase tracking-[0.14em] text-white hover:bg-[#ff28c6]"
                         >
                             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

@@ -8,7 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { AlertCircle, Clock, CheckCircle2, FileText, Image as ImageIcon, Film } from 'lucide-react'
+import { FileText, Image as ImageIcon, Film } from 'lucide-react'
+import { StatusIcon } from '@/components/qa/StatusIcon'
+import { qaStatusLabel } from '@/lib/qa-status'
 import Link from 'next/link'
 
 export default async function QAItemPage({ params }: { params: Promise<{ id: string, itemId: string }> }) {
@@ -49,15 +51,7 @@ export default async function QAItemPage({ params }: { params: Promise<{ id: str
 
     if (!item) return <div>Item não encontrado</div>
 
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'aberto': return <AlertCircle className="h-5 w-5 text-red-500" />
-            case 'em_correcao': return <Clock className="h-5 w-5 text-yellow-500" />
-            case 'em_homologacao': return <Clock className="h-5 w-5 text-blue-500" />
-            case 'finalizado': return <CheckCircle2 className="h-5 w-5 text-green-500" />
-            default: return <AlertCircle className="h-5 w-5" />
-        }
-    }
+    const getStatusIcon = (status: string) => <StatusIcon status={status} className="h-5 w-5" />
 
     return (
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
@@ -79,7 +73,7 @@ export default async function QAItemPage({ params }: { params: Promise<{ id: str
                 </div>
                 <div className="flex items-center gap-2">
                     {getStatusIcon(item.status)}
-                    <Badge variant="outline" className="border-border uppercase">{item.status.replace('_', ' ')}</Badge>
+                    <Badge variant="outline" className="border-border uppercase">{qaStatusLabel(item.status)}</Badge>
                 </div>
             </div>
 

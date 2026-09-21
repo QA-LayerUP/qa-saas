@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts'
 
@@ -9,44 +8,26 @@ interface DashboardChartsProps {
 }
 
 const COLORS = {
-    aberto: '#ef4444',       // Red - mantido para urgência
-    em_correcao: '#ffcc00',  // Amarelo Layer Up
-    em_homologacao: '#e700b9', // Ciano Layer Up
-    finalizado: '#7900E5',   // Ciano Layer Up (sucesso)
-    cancelado: '#94a3b8'     // Slate
+    aberto: '#ef4444',
+    em_correcao: '#ffcc00',
+    pendencia: '#f97316',
+    em_homologacao: '#e700b9',
+    finalizado: '#7900E5',
+    cancelado: '#94a3b8'
 }
 
 const PRIORITY_COLORS = {
-    alta: '#7900E5',   // Magenta Layer Up
-    media: '#ffcc00',  // Amarelo Layer Up
-    baixa: '#e700b9'   // Ciano Layer Up
+    alta: '#7900E5',
+    media: '#ffcc00',
+    baixa: '#e700b9',
 }
 
 export function DashboardCharts({ items }: DashboardChartsProps) {
-    const [isDark, setIsDark] = useState(false)
-
-    // Detectar tema atual
-    useEffect(() => {
-        const checkTheme = () => {
-            setIsDark(document.documentElement.classList.contains('dark'))
-        }
-        
-        checkTheme()
-        
-        // Observar mudanças no tema
-        const observer = new MutationObserver(checkTheme)
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ['class']
-        })
-        
-        return () => observer.disconnect()
-    }, [])
-    
     // Processar dados para o Gráfico de Status
     const statusData = [
         { name: 'Aberto', value: items.filter(i => i.status === 'aberto').length, color: COLORS.aberto },
         { name: 'Correção', value: items.filter(i => i.status === 'em_correcao').length, color: COLORS.em_correcao },
+        { name: 'Pendência', value: items.filter(i => i.status === 'pendencia').length, color: COLORS.pendencia },
         { name: 'Homolog.', value: items.filter(i => i.status === 'em_homologacao').length, color: COLORS.em_homologacao },
         { name: 'Finalizado', value: items.filter(i => i.status === 'finalizado').length, color: COLORS.finalizado },
     ].filter(i => i.value > 0)
@@ -58,28 +39,15 @@ export function DashboardCharts({ items }: DashboardChartsProps) {
         { name: 'Baixa', total: items.filter(i => i.priority === 'baixa').length },
     ]
 
-    // Estilos do tooltip baseados no tema
-    const tooltipStyle = isDark
-        ? {
-              backgroundColor: 'hsl(var(--card))',
-              borderRadius: '8px',
-              border: '1px solid hsl(var(--border))',
-              color: 'hsl(var(--card-foreground))',
-          }
-        : {
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              color: '#1e293b',
-          }
-
-    const tooltipItemStyle = isDark
-        ? { color: 'hsl(var(--card-foreground))' }
-        : { color: '#1e293b' }
-
-    const cursorStyle = isDark
-        ? { fill: 'hsl(var(--muted))' }
-        : { fill: '#f1f5f9' }
+    const tooltipStyle = {
+        backgroundColor: 'var(--card)',
+        borderRadius: '8px',
+        border: '1px solid var(--border)',
+        color: 'var(--card-foreground)',
+    }
+    const tooltipItemStyle = { color: 'var(--card-foreground)' }
+    const cursorStyle = { fill: 'var(--muted)' }
+    const tickStyle = { fill: 'var(--muted-foreground)' }
 
     return (
         <div className="grid gap-4 md:grid-cols-2">
@@ -116,7 +84,7 @@ export function DashboardCharts({ items }: DashboardChartsProps) {
                                         verticalAlign="bottom" 
                                         height={36} 
                                         iconType="circle"
-                                        wrapperStyle={{ color: isDark ? 'hsl(var(--foreground))' : '#1e293b' }}
+                                        wrapperStyle={{ color: 'var(--foreground)' }}
                                     />
                                 </PieChart>
                             </ResponsiveContainer>
@@ -145,14 +113,14 @@ export function DashboardCharts({ items }: DashboardChartsProps) {
                                     fontSize={12} 
                                     tickLine={false} 
                                     axisLine={false}
-                                    tick={{ fill: isDark ? 'hsl(var(--muted-foreground))' : '#64748b' }}
+                                    tick={tickStyle}
                                 />
                                 <YAxis 
                                     fontSize={12} 
                                     tickLine={false} 
                                     axisLine={false} 
                                     allowDecimals={false}
-                                    tick={{ fill: isDark ? 'hsl(var(--muted-foreground))' : '#64748b' }}
+                                    tick={tickStyle}
                                 />
                                 <Tooltip 
                                     cursor={cursorStyle}

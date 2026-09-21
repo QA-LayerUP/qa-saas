@@ -1,9 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { sendEmail } from '@/lib/email'
 
 export async function inviteUserAction(email: string, role: string) {
     const supabase = await createClient()
@@ -36,8 +34,7 @@ export async function inviteUserAction(email: string, role: string) {
     const formattedRole = role.charAt(0).toUpperCase() + role.slice(1);
 
     try {
-        await resend.emails.send({
-            from: 'QA Hub · Layer Up <onboarding@qa.projetoslayerup.com.br>', // Lembre de validar seu domínio no Resend para produção
+        await sendEmail({
             to: email,
             subject: 'Você foi convidado para o QA Hub · Layer Up',
             html: `
@@ -122,7 +119,7 @@ export async function inviteUserAction(email: string, role: string) {
         })
         return { success: true }
     } catch (emailError) {
-        console.error('Erro Resend:', emailError)
+        console.error('Erro SMTP:', emailError)
         return { error: 'Convite salvo, mas erro ao enviar e-mail.' }
     }
 }

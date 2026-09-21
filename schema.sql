@@ -6,7 +6,9 @@ create table projects (
   id uuid default uuid_generate_v4() primary key,
   name text not null,
   client text,
-  status text check (status in ('em_qa', 'corrigindo', 'homologando', 'finalizado')) default 'em_qa',
+  status text check (status in ('em_andamento', 'pausado', 'cancelado', 'concluido')) default 'em_andamento',
+  site_url text,
+  figma_url text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -34,7 +36,7 @@ create table qa_items (
   title text not null,
   description text,
   priority text check (priority in ('alta', 'media', 'baixa')) default 'media',
-  status text check (status in ('aberto', 'em_correcao', 'em_homologacao', 'finalizado')) default 'aberto',
+  status text check (status in ('aberto', 'em_correcao', 'pendencia', 'em_homologacao', 'finalizado')) default 'aberto',
   assigned_to uuid references users(id),
   assigned_role text check (assigned_role in ('ux', 'dev', 'content', 'qa')),
   created_by uuid references users(id),

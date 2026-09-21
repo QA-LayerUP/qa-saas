@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
-import { CreateCategoryModal } from '@/components/qa/CreateCategoryModal'
-import { ManageCategoriesModal } from '@/components/qa/ManageCategoriesModal'
 import { LinkTeamModal } from '@/components/projects/LinkTeamModal'
+import { EditProjectModal } from '@/components/projects/ProjectFormModal'
 import { ManageTeamMembersModal } from '@/components/teams/ManageTeamMembersModal'
 import { TaskModeSelector } from '@/components/qa/TaskModeSelector'
 import { NewQAItemButton } from '@/components/qa/NewQAItemButton'
@@ -10,7 +9,7 @@ import TeamTabContent from '@/components/qa/TeamTabContent'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Users, Settings2, Sparkles } from 'lucide-react'
+import { Users, Settings2, Sparkles, ExternalLink, Figma, Pencil } from 'lucide-react'
 
 interface ProjectQAPageProps {
     params: Promise<{ id: string }>
@@ -86,23 +85,60 @@ export default async function ProjectQAPage({ params }: ProjectQAPageProps) {
                 <div>
                         <div className="flex items-center gap-2">
                             <div className="h-1 w-6 rounded-full bg-linear-to-r from-[#7900E5] to-[#7900E5]" />
-                            <p className="font-montserrat text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7900E5] dark:text-white">
+                            <p className="font-montserrat text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7900E5] dark:text-foreground">
                                 {'// Gerenciamento de QA'}
                             </p>
                         </div>
                         <h1 className="font-montserrat text-2xl font-bold tracking-tight">{project?.name}</h1>
-                        <p className="mt-1 text-sm text-muted-foreground">Gerencie o QA deste projeto.</p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            {project?.client ? `${project.client} · Gerencie o QA deste projeto.` : 'Gerencie o QA deste projeto.'}
+                        </p>
+                        {(project?.site_url || project?.figma_url) && (
+                            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
+                                {project.site_url && (
+                                    <a
+                                        href={project.site_url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center gap-1 text-roxo hover:underline dark:text-amarelo"
+                                    >
+                                        <ExternalLink className="h-3 w-3" />
+                                        Ver site
+                                    </a>
+                                )}
+                                {project.figma_url && (
+                                    <a
+                                        href={project.figma_url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center gap-1 text-roxo hover:underline dark:text-amarelo"
+                                    >
+                                        <Figma className="h-3 w-3" />
+                                        Ver Figma
+                                    </a>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
                 
                 <div className="flex flex-wrap gap-2 items-center">
-                    <CreateCategoryModal projectId={projectId} />
-                    <ManageCategoriesModal
-                        projectId={projectId}
-                        categories={categories || []}
-                        teams={teams}
-                        items={items || []}
-                    />
+                    {project && (
+                        <EditProjectModal
+                            project={project}
+                            trigger={
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-2 text-xs font-semibold hover:border-[#7900E5]/30 hover:bg-[#7900E5]/5 hover:text-[#7900E5]"
+                                >
+                                    <Pencil className="h-4 w-4" />
+                                    Editar
+                                </Button>
+                            }
+                        />
+                    )}
+
                     <LinkTeamModal 
                         projectId={projectId} 
                         existingTeamIds={existingTeamIds} 
@@ -110,19 +146,14 @@ export default async function ProjectQAPage({ params }: ProjectQAPageProps) {
                     
                     {project?.site_url ? (
                         <TaskModeSelector
-                            categories={categories || []}
                             teams={teams}
                             projectId={projectId}
-                            hasCategories={(categories || []).length > 0}
                         />
                     ) : (
-                        (categories || []).length > 0 && (
-                            <NewQAItemButton
-                                categories={categories || []}
-                                teams={teams}
-                                projectId={projectId}
-                            />
-                        )
+                        <NewQAItemButton
+                            teams={teams}
+                            projectId={projectId}
+                        />
                     )}
                 </div>
             </div>

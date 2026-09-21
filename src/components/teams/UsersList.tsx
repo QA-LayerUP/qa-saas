@@ -47,10 +47,10 @@ export function UsersList({ data }: UsersListProps) {
 
     const getRoleBadge = (role: string) => {
         switch(role) {
-            case 'admin': return 'border-purple-200 bg-purple-50 text-purple-700'
-            case 'qa': return 'border-orange-200 bg-orange-50 text-orange-700'
-            case 'colaborador': return 'border-blue-200 bg-blue-50 text-blue-700'
-            default: return 'border-slate-200 bg-slate-50 text-slate-600'
+            case 'admin': return 'border-rosa/40 bg-rosa/15 text-rosa'
+            case 'qa': return 'border-amarelo/40 bg-amarelo/15 text-amarelo'
+            case 'colaborador': return 'border-roxo/40 bg-roxo/15 text-roxo dark:text-[#c9a0ff]'
+            default: return 'border-border bg-foreground/5 text-foreground/70'
         }
     }
 
@@ -89,7 +89,7 @@ export function UsersList({ data }: UsersListProps) {
     // ----------------------------------------------
 
     return (
-        <Card className="rounded-xl border-border shadow-sm">
+        <Card>
             <CardHeader className="border-b px-6 py-4">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
