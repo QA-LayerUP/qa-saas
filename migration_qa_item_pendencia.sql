@@ -1,4 +1,7 @@
 -- Libera o status "pendencia" nos cards de QA (coluna Pendência, antes de Homologação).
+-- Mantém "cancelado" (tarefas arquivadas pelo botão de excluir).
+-- Pode rodar de novo se o ADD CONSTRAINT falhou da primeira vez.
+
 do $$
 declare
   constraint_name text;
@@ -17,6 +20,28 @@ begin
   end loop;
 end $$;
 
+update public.qa_items
+set status = 'aberto'
+where status is null
+   or status not in (
+     'aberto',
+     'em_correcao',
+     'pendencia',
+     'em_homologacao',
+     'finalizado',
+     'cancelado'
+   );
+
+alter table public.qa_items
+  drop constraint if exists qa_items_status_check;
+
 alter table public.qa_items
   add constraint qa_items_status_check
-  check (status in ('aberto', 'em_correcao', 'pendencia', 'em_homologacao', 'finalizado'));
+  check (status in (
+    'aberto',
+    'em_correcao',
+    'pendencia',
+    'em_homologacao',
+    'finalizado',
+    'cancelado'
+  ));

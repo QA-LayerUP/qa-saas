@@ -36,7 +36,7 @@ create table qa_items (
   title text not null,
   description text,
   priority text check (priority in ('alta', 'media', 'baixa')) default 'media',
-  status text check (status in ('aberto', 'em_correcao', 'pendencia', 'em_homologacao', 'finalizado')) default 'aberto',
+  status text check (status in ('aberto', 'em_correcao', 'pendencia', 'em_homologacao', 'finalizado', 'cancelado')) default 'aberto',
   assigned_to uuid references users(id),
   assigned_role text check (assigned_role in ('ux', 'dev', 'content', 'qa')),
   created_by uuid references users(id),
